@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HARON SAS4">
+  <meta name="theme-color" content="#0F1218">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <title>HARON NET SAS4</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0F1218;
+      color: #F1F5F9;
+      padding: env(safe-area-inset-top, 20px) 18px env(safe-area-inset-bottom, 20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: #161B24;
+      border: 1px solid #263042;
+      border-radius: 20px;
+      padding: 24px 20px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.14);
+      color: #38BDF8;
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    h1 { margin: 0 0 6px; font-size: 22px; color: #FFFFFF; }
+    p.sub { margin: 0 0 20px; font-size: 13px; color: #94A3B8; }
+    label { display: block; font-size: 12.5px; color: #CBD5E1; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      background: #0F1218;
+      border: 1px solid #2D3748;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #FFFFFF;
+      font-size: 14px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    input:focus { border-color: #38BDF8; }
+    button {
+      width: 100%;
+      background: #0EA5E9;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:active { opacity: 0.88; }
+    .status {
+      margin-top: 14px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #0F1218;
+      color: #94A3B8;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">HARON NET • بوابة الوكلاء</div>
+    <h1>HARON NET SAS4</h1>
+    <p class="sub">إدارة المشتركين وتفعيل الاشتراكات</p>
+
+    <label>رابط سيرفر SAS4 (أو رابط الوسيط HTTPS)</label>
+    <input id="serverUrl" type="url" dir="ltr" placeholder="https://your-sas4-domain.com">
+
+    <label>اسم المستخدم (الوكيل)</label>
+    <input id="username" type="text" dir="ltr" placeholder="agent_username">
+
+    <label>كلمة المرور</label>
+    <input id="password" type="password" dir="ltr" placeholder="••••••••">
+
+    <button id="loginBtn" onclick="connectSas4()">تسجيل الدخول</button>
+    <div id="statusBox" class="status"></div>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById('serverUrl');
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const statusBox = document.getElementById('statusBox');
+
+    urlInput.value = localStorage.getItem('sas4_url') || '';
+    userInput.value = localStorage.getItem('sas4_user') || '';
+
+    function showStatus(msg, color) {
+      statusBox.style.display = 'block';
+      statusBox.style.color = color || '#94A3B8';
+      statusBox.textContent = msg;
+    }
+
+    async function connectSas4() {
+      const base = urlInput.value.trim().replace(/\/+$/, '');
+      const username = userInput.value.trim();
+      const password = passInput.value;
+
+      if (!base || !username || !password) {
+        showStatus('يرجى إدخال رابط السيرفر واسم المستخدم وكلمة المرور.', '#FBBF24');
+        return;
+      }
+
+      localStorage.setItem('sas4_url', base);
+      localStorage.setItem('sas4_user', username);
+      showStatus('جاري الاتصال بسيرفر SAS4...', '#38BDF8');
+
+      try {
+        const res = await fetch(base + '/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && (data.token || data.access_token || data.status === 'ok')) {
+          localStorage.setItem('sas4_token', data.token || data.access_token || '');
+          showStatus('تم تسجيل الدخول بنجاح! جاهز لربط شاشات المشتركين والتجديد.', '#4ADE80');
+        } else {
+          showStatus('رد السيرفر (' + res.status + '): تحقق من البيانات أو مسار الـ API.', '#FCA5A5');
+        }
+      } catch (err) {
+        showStatus('تعذر الاتصال المباشر من المتصفح (بسبب CORS أو رابط HTTP غير مشفر).', '#FCA5A5');
+      }
+    }
+  </script>
+</body>
+</html>
