@@ -4,8 +4,7 @@ window.onerror = function(m) {
 };
 
 const SAS4_KEY = "abcdefghijuklmno0123456789012345";
-let allSubs = [], currentFilter = "online", sortMode = "default", profilesCache = [], octetSnaps = {}, liveTimer = null;
-
+let allSubs = [], currentFilter = "online", sortMode = "default", sortDir = "desc", profilesCache = [], octetSnaps = {}, liveTimer = null;
 const gs = (k, d = "") => localStorage.getItem(k) || d;
 const ss = (k, v) => localStorage.setItem(k, v);
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => (c === "x" ? Math.random() * 16 | 0 : (Math.random() * 16 | 0) & 3 | 8).toString(16));
@@ -248,9 +247,28 @@ function setFilter(f) {
   renderList();
 }
 
+const SORT_LABELS = { down: "التنزيل", up: "الرفع", debt: "الديون", days: "المتبقي" };
+
 function setSort(m, el) {
-  sortMode = m;
-  document.querySelectorAll(".sort-pill").forEach(p => p.classList.remove("on"));
+  haptic(24);
+  if (m === "default") {
+    sortMode = "default";
+    sortDir = "desc";
+  } else if (sortMode === m) {
+    sortDir = (sortDir === "desc") ? "asc" : "desc";
+  } else {
+    sortMode = m;
+    sortDir = "desc";
+  }
+
+  document.querySelectorAll(".sort-pill").forEach(p => {
+    p.classList.remove("on");
+    const key = (p.getAttribute("onclick") || "").match(/setSort\('([^']+)'/);
+    if (key && SORT_LABELS[key[1]]) {
+      const arrow = (key[1] === sortMode && sortDir === "asc") ? "↑" : "↓";
+      p.textContent = arrow + " " + SORT_LABELS[key[1]];
+    }
+  });
   el.classList.add("on");
   renderList();
 }
@@ -274,12 +292,15 @@ function renderList() {
     return !q || s.username.toLowerCase().includes(q) || s.fullName.toLowerCase().includes(q) || s.profile.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q);
   });
 
+  const dir = (sortDir === "desc") ? -1 : 1;
   list.sort((a, b) => {
-    if (sortMode === "down") return (b.dn - a.dn) || (b.isOnline - a.isOnline);
-    if (sortMode === "up") return (b.up - a.up) || (b.isOnline - a.isOnline);
-    if (sortMode === "debt") return (b.loan - a.loan);
-    if (sortMode === "days") return (a.days - b.days);
-    return (b.isOnline - a.isOnline) || (b.isActive - a.isActive) || a.username.localeCompare(b.username, undefined, { numeric: true });
+    let diff = 0;
+    if (sortMode === "down") diff = (a.dn - b.dn) * dir;
+    else if (sortMode === "up") diff = (a.up - b.up) * dir;
+    else if (sortMode === "debt") diff = (a.loan - b.loan) * dir;
+    else if (sortMode === "days") diff = (a.days - b.days) * dir;
+    else return (b.isOnline - a.isOnline) || (b.isActive - a.isActive) || a.username.localeCompare(b.username, undefined, { numeric: true });
+    return diff || a.username.localeCompare(b.username, undefined, { numeric: true });
   });
 
   const el = document.getElementById("subsList");
