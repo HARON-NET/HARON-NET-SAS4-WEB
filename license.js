@@ -3,13 +3,17 @@ const LIC_VENDOR_WA = "9647750149398";
 const LIC_TRIAL_DAYS = 7;
 const LIC_DAY_MS = 86400000;
 
-function haptic(pattern = 14) {
+function haptic(pattern = 22) {
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+  try {
+    const lbl = document.getElementById("iosHapticLbl");
+    if (lbl) lbl.click();
+  } catch (e) {}
 }
 
-document.addEventListener("pointerdown", (e) => {
-  if (e.target.closest("button, .pill, a[href], summary")) haptic(12);
-}, { passive: true });
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button, .pill, a[href], summary, .dev-box")) haptic(20);
+}, true);
 
 const Sas4License = (() => {
   const appTag = "sas4";
@@ -161,17 +165,17 @@ const Sas4License = (() => {
     const dev = await deviceCode();
     const chk = await verify(raw, dev);
     if (!chk.payload) {
-      haptic([30, 40, 30]);
+      haptic([35, 45, 35]);
       return { ok: false, msg: chk.err === "device" ? "هذا المفتاح مخصّص لجهاز آخر" : "مفتاح الاشتراك غير صحيح" };
     }
     const { now } = await monotonicClock(dev);
     const left = daysBetween(now, chk.payload.e);
     if (left === null || left < 0) {
-      haptic([30, 40, 30]);
+      haptic([35, 45, 35]);
       return { ok: false, msg: "انتهت صلاحية هذا المفتاح" };
     }
     localStorage.setItem(licKey, raw.replace(/\s+/g, ""));
-    haptic([15, 35, 25]);
+    haptic([20, 40, 30]);
     return { ok: true, msg: `تم التفعيل بنجاح. ينتهي الاشتراك في ${chk.payload.e}` };
   }
 
@@ -181,7 +185,6 @@ const Sas4License = (() => {
 let currentLicStatus = null, licAllowClose = true;
 
 async function openSettingsModal() {
-  haptic(14);
   const st = await Sas4License.status();
   currentLicStatus = st;
   document.getElementById("setLicSummary").textContent = st.summary;
@@ -194,7 +197,6 @@ async function openSettingsModal() {
 }
 
 function saveSettingsAndConnect() {
-  haptic(16);
   const lurl = document.getElementById("setLoginUrl").value.trim();
   const purl = document.getElementById("setProxyUrl").value.trim().replace(/\/+$/, "");
   const u = document.getElementById("setUser").value.trim();
@@ -209,7 +211,7 @@ function saveSettingsAndConnect() {
 }
 
 function clearSavedSettings() {
-  haptic([20, 30, 20]);
+  haptic([25, 35, 25]);
   localStorage.removeItem("sas4_user"); localStorage.removeItem("sas4_pass"); localStorage.removeItem("sas4_token");
   document.getElementById("setUser").value = ""; document.getElementById("setPass").value = "";
   const m = document.getElementById("setMsg");
@@ -217,7 +219,6 @@ function clearSavedSettings() {
 }
 
 async function openLicenseModal(allowClose = true) {
-  haptic(14);
   licAllowClose = allowClose;
   const st = await Sas4License.status();
   currentLicStatus = st;
@@ -231,7 +232,6 @@ async function openLicenseModal(allowClose = true) {
 
 function copyDevCode() {
   if (!currentLicStatus) return;
-  haptic(18);
   navigator.clipboard.writeText(currentLicStatus.device);
   const fb = document.getElementById("licFeedback");
   fb.style.display = "block"; fb.style.color = "#38BDF8"; fb.textContent = "تم نسخ رمز الجهاز ✓";
@@ -239,13 +239,11 @@ function copyDevCode() {
 
 function requestKeyWhatsApp() {
   if (!currentLicStatus) return;
-  haptic(18);
   const txt = `أرغب بتفعيل تطبيق HARON NET SAS4 (Web).\nرمز جهازي: ${currentLicStatus.device}`;
   window.open(`https://wa.me/${Sas4License.vendorWhatsApp}?text=${encodeURIComponent(txt)}`, "_blank");
 }
 
 async function submitLicenseKey() {
-  haptic(16);
   const raw = document.getElementById("licKeyInput").value;
   const res = await Sas4License.activate(raw);
   const fb = document.getElementById("licFeedback");
@@ -290,3 +288,4 @@ window.addEventListener("DOMContentLoaded", () => {
     };
   }
 });
+      
