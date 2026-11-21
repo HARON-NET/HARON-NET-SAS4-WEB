@@ -10,6 +10,13 @@ function haptic(pattern = 22) {
   _lastHaptic = now;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
 }
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button, .sort-pill, .stat-card, .debt-banner, .icon-btn, .search-btn, .live-pill, .dev-box, summary")) {
+    haptic(22);
+  }
+}, true);
+
 /* بصمة العتاد الثابتة (مثل HARON NET MANAGER) */
 async function computeHardwareCode() {
   let gpu = "";
@@ -30,7 +37,8 @@ async function computeHardwareCode() {
   const touch = navigator.maxTouchPoints || 0;
   const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || "";
   const uaModel = (navigator.userAgent.match(/\(([^)]+)\)/) || ["", ""])[1]
-    .replace(/; wv\)/g, "")
+    .replace(/; wv/g, "")
+    .replace(/Build\/[^\s;)]+/g, "")
     .replace(/Chrome\/[\d.]+/g, "")
     .trim();
 
@@ -46,15 +54,26 @@ const LicVault = {
   storeName: "kv",
   _idbOp(mode, fn) {
     return new Promise((resolve) => {
+      let done = false;
+      const finish = (v) => { if (!done) { done = true; resolve(v); } };
+      setTimeout(() => finish(""), 500);
       try {
         const req = indexedDB.open(this.dbName, 1);
-        req.onupgradeneeded = () => req.result.createObjectStore(this.storeName);
-        req.onsuccess = () => {
-          const tx = req.result.transaction(this.storeName, mode);
-          fn(tx.objectStore(this.storeName), resolve);
+        req.onupgradeneeded = () => {
+          if (!req.result.objectStoreNames.contains(this.storeName)) {
+            req.result.createObjectStore(this.storeName);
+          }
         };
-        req.onerror = () => resolve(null);
-      } catch (e) { resolve(null); }
+        req.onsuccess = () => {
+          try {
+            const tx = req.result.transaction(this.storeName, mode);
+            tx.onerror = () => finish("");
+            tx.onabort = () => finish("");
+            fn(tx.objectStore(this.storeName), finish);
+          } catch (e) { finish(""); }
+        };
+        req.onerror = () => finish("");
+      } catch (e) { finish(""); }
     });
   },
   _getCookie(k) {
@@ -62,10 +81,13 @@ const LicVault = {
     return m ? decodeURIComponent(m[1]) : "";
   },
   _setCookie(k, v) {
-    document.cookie = `${k}=${encodeURIComponent(v)}; max-age=315360000; path=/; SameSite=Lax`;
+    try {
+      document.cookie = `${k}=${encodeURIComponent(v)}; max-age=315360000; path=/; SameSite=Lax`;
+    } catch (e) {}
   },
   async get(k) {
-    const ls = localStorage.getItem(k) || "";
+    let ls = "";
+    try { ls = localStorage.getItem(k) || ""; } catch (e) {}
     const ck = this._getCookie(k) || "";
     const idb = await this._idbOp("readonly", (st, res) => {
       const r = st.get(k);
@@ -73,7 +95,9 @@ const LicVault = {
       r.onerror = () => res("");
     });
     const val = ls || idb || ck || "";
-    if (val) await this.set(k, val); // مزامنة تلقائية للطبقات الثلاث
+    if (val && (!ls || !idb || !ck)) {
+      await this.set(k, val);
+    }
     return val;
   },
   async set(k, v) {
@@ -88,28 +112,15 @@ const LicVault = {
   }
 };
 
-
-document.addEventListener("click", (e) => {
-  if (e.target.closest("button, .sort-pill, .stat-card, .debt-banner, .icon-btn, .search-btn, .live-pill, .dev-box, summary")) {
-    haptic(22);
-  }
-}, true);
-
-
 const Sas4License = (() => {
   const appTag = "sas4";
-  const seedKey = "lic_device_seed";
+  const hwKey = "lic_hw_device_code";
   const clockKey = "lic_clock_state";
   const licKey = "lic_saved_key";
   const te = new TextEncoder();
 
   function bufToHex(buf) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-
-  async function sha256Hex(str) {
-    const dig = await crypto.subtle.digest("SHA-256", te.encode(str));
-    return bufToHex(dig);
   }
 
   async function hmacHex(devCode, data) {
@@ -122,19 +133,18 @@ const Sas4License = (() => {
   }
 
   async function deviceCode() {
-    let seed = localStorage.getItem(seedKey);
-    if (!seed) {
-      seed = (crypto.randomUUID ? crypto.randomUUID() : (Date.now() + "-" + Math.random().toString(36).slice(2))).toUpperCase();
-      localStorage.setItem(seedKey, seed);
+    let code = await LicVault.get(hwKey);
+    if (!code || !/^[0-9A-F]{5}-[0-9A-F]{5}$/i.test(code)) {
+      code = await computeHardwareCode();
+      await LicVault.set(hwKey, code);
     }
-    const hex = (await sha256Hex(`mkm1:${seed}`)).toUpperCase();
-    return `${hex.slice(0, 5)}-${hex.slice(5, 10)}`;
+    return code.toUpperCase();
   }
 
   async function monotonicClock(dev) {
     const now = Date.now();
     let start = Infinity, last = 0;
-    const raw = localStorage.getItem(clockKey);
+    const raw = await LicVault.get(clockKey);
     if (raw) {
       const parts = raw.trim().split(":");
       if (parts.length === 3) {
@@ -148,7 +158,7 @@ const Sas4License = (() => {
     if (!Number.isFinite(start)) start = now;
     const eff = Math.max(now, last);
     const sig = await hmacHex(dev, `${appTag}|${dev}|${start}|${eff}`);
-    localStorage.setItem(clockKey, `${start}:${eff}:${sig}`);
+    await LicVault.set(clockKey, `${start}:${eff}:${sig}`);
     return { start, now: eff };
   }
 
@@ -221,7 +231,7 @@ const Sas4License = (() => {
   async function status() {
     const dev = await deviceCode();
     const { start, now } = await monotonicClock(dev);
-    const saved = localStorage.getItem(licKey);
+    const saved = await LicVault.get(licKey);
     if (saved) {
       const res = await verify(saved, dev);
       if (res.payload) {
@@ -255,7 +265,7 @@ const Sas4License = (() => {
       haptic([35, 45, 35]);
       return { ok: false, msg: "انتهت صلاحية هذا المفتاح" };
     }
-    localStorage.setItem(licKey, raw.replace(/\s+/g, ""));
+    await LicVault.set(licKey, raw.replace(/\s+/g, ""));
     haptic([20, 40, 30]);
     return { ok: true, msg: `تم التفعيل بنجاح. ينتهي الاشتراك في ${chk.payload.e}` };
   }
@@ -352,21 +362,31 @@ async function enforceLicenseGate() {
   return true;
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+let _licGateBound = false;
+function initLicenseGate() {
+  if (_licGateBound) return;
+  _licGateBound = true;
   enforceLicenseGate();
   const origDoLogin = window.doLogin;
-  if (typeof origDoLogin === "function") {
-    window.doLogin = async function(silent = false) {
+  if (typeof origDoLogin === "function" && !origDoLogin._licWrapped) {
+    const wrappedLogin = async function(silent = false) {
       if (!(await enforceLicenseGate())) return false;
       return origDoLogin(silent);
     };
+    wrappedLogin._licWrapped = true;
+    window.doLogin = wrappedLogin;
   }
   const origRefresh = window.refreshAll;
-  if (typeof origRefresh === "function") {
-    window.refreshAll = async function() {
+  if (typeof origRefresh === "function" && !origRefresh._licWrapped) {
+    const wrappedRefresh = async function() {
       if (!(await enforceLicenseGate())) return;
       return origRefresh();
     };
+    wrappedRefresh._licWrapped = true;
+    window.refreshAll = wrappedRefresh;
   }
-});
-      
+}
+
+window.addEventListener("DOMContentLoaded", initLicenseGate);
+if (document.readyState !== "loading") initLicenseGate();
+        
