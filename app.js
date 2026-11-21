@@ -250,7 +250,6 @@ function setFilter(f) {
 const SORT_LABELS = { down: "التنزيل", up: "الرفع", debt: "الديون", days: "المتبقي" };
 
 function setSort(m, el) {
-  haptic(24);
   if (m === "default") {
     sortMode = "default";
     sortDir = "desc";
@@ -293,6 +292,16 @@ function renderList() {
   });
 
   const dir = (sortDir === "desc") ? -1 : 1;
+  list.sort((a, b) => {
+    let diff = 0;
+    if (sortMode === "down") diff = (a.dn - b.dn) * dir;
+    else if (sortMode === "up") diff = (a.up - b.up) * dir;
+    else if (sortMode === "debt") diff = (a.loan - b.loan) * dir;
+    else if (sortMode === "days") diff = (a.days - b.days) * dir;
+    else return (b.isOnline - a.isOnline) || (b.isActive - a.isActive) || a.username.localeCompare(b.username, undefined, { numeric: true });
+    return diff || a.username.localeCompare(b.username, undefined, { numeric: true });
+  });
+    
   list.sort((a, b) => {
     let diff = 0;
     if (sortMode === "down") diff = (a.dn - b.dn) * dir;
