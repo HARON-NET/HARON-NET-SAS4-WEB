@@ -213,20 +213,31 @@ async function loadSubs(silent = false) {
   renderList();
 }
 
+let liveBusy = false;
 function startLiveLoop() {
   if (liveTimer) clearInterval(liveTimer);
   const pill = document.getElementById("livePill");
   if (pill) { pill.textContent = "● مباشر"; pill.classList.remove("off"); }
   liveTimer = setInterval(async () => {
-    const om = await fetchOnlineMap();
-    allSubs.forEach(s => {
-      const lv = om[s.id];
-      if (lv) { s.isOnline = true; s.rad = lv.rad; s.ip = lv.ip; s.mac = lv.mac; s.nas = lv.nas; s.uptime = lv.uptime; s.dn = lv.dn; s.up = lv.up; }
-      else { s.isOnline = false; s.dn = 0; s.up = 0; }
-    });
-    renderList();
-  }, 4000);
+    if (liveBusy) return;
+    liveBusy = true;
+    try {
+      const om = await fetchOnlineMap();
+      allSubs.forEach(s => {
+        const lv = om[s.id];
+        if (lv) { s.isOnline = true; s.rad = lv.rad; s.ip = lv.ip; s.mac = lv.mac; s.nas = lv.nas; s.uptime = lv.uptime; s.dn = lv.dn; s.up = lv.up; }
+        else { s.isOnline = false; s.dn = 0; s.up = 0; }
+      });
+      renderList();
+      if (typeof activeDetailUid !== "undefined" && activeDetailUid && typeof renderDetailBody === "function") {
+        renderDetailBody();
+      }
+    } finally {
+      liveBusy = false;
+    }
+  }, 1000);
 }
+
 
 function toggleLive() {
   const pill = document.getElementById("livePill");
