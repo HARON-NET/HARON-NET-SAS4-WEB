@@ -4,13 +4,28 @@ let detailCache = {};
 let devCfg = { type: "ubnt", proto: "https", autoIp: true, manualIp: "", user: "ubnt", pass: "" };
 let activeDevSubTab = "basic";
 
-function closeSubDetail() {
+function hideSubDetailUI() {
   const v = document.getElementById("subDetailView");
   if (v) v.style.display = "none";
   const app = document.getElementById("appView");
   if (app) app.style.display = "block";
   activeDetailUid = null;
 }
+
+function closeSubDetail() {
+  if (history.state && history.state.subDetail) {
+    history.back();
+  } else {
+    hideSubDetailUI();
+  }
+}
+
+window.addEventListener("popstate", () => {
+  if (activeDetailUid !== null) {
+    hideSubDetailUI();
+  }
+});
+
 
 function fmtSessionHMS(sec) {
   sec = Number(sec || 0);
