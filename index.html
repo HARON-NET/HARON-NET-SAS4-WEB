@@ -11,21 +11,23 @@
   <title>HARON NET SAS4</title>
   <style>
     *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{margin:0;background:#0B0F17;color:#F8FAFC;padding:16px 14px 30px}
+    body{margin:0;background:#0B0F17;color:#F8FAFC;padding:16px 14px 32px}
     .wrap{max-width:500px;margin:0 auto}
-    .card{background:#131926;border:1px solid #253047;border-radius:16px;padding:18px;margin-bottom:12px}
+    .card{background:#131926;border:1px solid #253047;border-radius:16px;padding:16px;margin-bottom:11px}
     .badge{display:inline-block;background:rgba(14,165,233,.15);color:#38BDF8;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:8px}
     h1{margin:0 0 4px;font-size:20px}
     .sub{margin:0 0 14px;font-size:12.5px;color:#94A3B8}
     label{display:block;font-size:12px;color:#CBD5E1;margin-bottom:4px}
-    input{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:11px;color:#F8FAFC;font-size:14px;margin-bottom:11px;outline:none}
-    input:focus{border-color:#0EA5E9}
-    .btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:11px;padding:12px;font-size:14.5px;font-weight:700;cursor:pointer}
-    .btn:disabled{opacity:.55}
+    input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:10px 11px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
+    input:focus,select:focus{border-color:#0EA5E9}
+    .btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:11px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.5}
     .btn-sm{width:auto;padding:6px 11px;font-size:12px;border-radius:8px}
+    .btn-green{background:#16A34A;color:#fff}
+    .btn-amber{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45);color:#FCD34D}
     .btn-ghost{background:#1A2234;border:1px solid #253047;color:#F8FAFC}
     .btn-red{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#FCA5A5}
-    .status{margin-top:11px;font-size:12px;padding:9px 11px;border-radius:9px;background:#0B0F17;border:1px solid #1E293B;color:#94A3B8;word-break:break-word}
+    .status{margin-top:10px;font-size:12px;padding:9px 11px;border-radius:9px;background:#0B0F17;border:1px solid #1E293B;color:#94A3B8;word-break:break-word}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
     .stat{background:#131926;border:1px solid #253047;border-radius:12px;padding:11px}
     .stat small{display:block;color:#94A3B8;font-size:11px;margin-bottom:3px}
@@ -38,8 +40,10 @@
     .tag{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
     .tag.act{background:rgba(34,197,94,.15);color:#4ADE80}
     .tag.exp{background:rgba(239,68,68,.15);color:#F87171}
-    .meta{font-size:12px;color:#94A3B8;line-height:1.6;margin-top:5px}
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:14px;z-index:50}
+    .meta{font-size:12px;color:#94A3B8;line-height:1.65;margin-top:5px}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:14px;z-index:50;overflow-y:auto}
+    .box-info{background:#0B0F17;border:1px solid #1E293B;border-radius:11px;padding:11px;margin-bottom:11px;font-size:12.5px;line-height:1.7}
+    .sep{border-top:1px solid #253047;margin:12px 0;padding-top:12px}
   </style>
 </head>
 <body>
@@ -48,7 +52,7 @@
     <div class="card" style="width:100%">
       <div class="badge">HARON NET • بوابة الوكلاء</div>
       <h1>HARON NET SAS4</h1>
-      <p class="sub">إدارة المشتركين ومتابعة الشبكة</p>
+      <p class="sub">إدارة المشتركين وتفعيل الاشتراكات</p>
       <label>اسم المستخدم (الوكيل)</label>
       <input id="username" type="text" dir="ltr" placeholder="admin@haron">
       <label>كلمة المرور</label>
@@ -68,9 +72,10 @@
   </div>
 
   <div id="appView" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div><b>HARON NET SAS4</b><div id="agentLabel" style="font-size:12px;color:#94A3B8"></div></div>
-      <div style="display:flex;gap:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:6px">
+      <div><b>HARON NET SAS4</b><div id="agentLabel" style="font-size:11.5px;color:#94A3B8"></div></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button type="button" class="btn btn-sm btn-ghost" onclick="openHistory()">السجل</button>
         <button type="button" class="btn btn-sm btn-ghost" onclick="refreshAll()">تحديث</button>
         <button type="button" class="btn btn-sm btn-red" onclick="logout()">خروج</button>
       </div>
@@ -92,8 +97,9 @@
   </div>
 </div>
 
+<!-- نافذة التفاصيل / السجل -->
 <div id="detailModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
-  <div class="card" style="width:100%;max-width:400px">
+  <div class="card" style="width:100%;max-width:430px;max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <b id="modalTitle">تفاصيل المشترك</b>
       <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('detailModal').style.display='none'">إغلاق</button>
@@ -102,13 +108,35 @@
   </div>
 </div>
 
+<!-- نافذة تجديد وتفعيل الاشتراك -->
+<div id="renewModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
+  <div class="card" style="width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <b id="renewTitle">تجديد وتفعيل الاشتراك</b>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('renewModal').style.display='none'">إغلاق</button>
+    </div>
+    <div id="renewContent" class="meta">جاري جلب بيانات الباقة والرصيد...</div>
+  </div>
+</div>
+
 <script>
-window.onerror = function(msg) {
-  var b = document.getElementById("statusBox");
-  if (b) { b.style.color = "#FCA5A5"; b.textContent = "خطأ برمجي: " + msg; }
-};
 const SAS4_KEY = "abcdefghijuklmno0123456789012345";
-let allSubs = [], currentFilter = "all";
+let allSubs = [], currentFilter = "all", profilesCache = [];
+
+function genUUID() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function trMsg(code) {
+  if (code === "rsp_insufficient_balance") return "الرصيد أو النقاط غير كافية لإتمام العملية";
+  if (code === "rsp_profile_changed") return "تم تغيير الباقة بنجاح";
+  if (code === "rsp_success") return "تمت العملية بنجاح";
+  return code || "فشل تنفيذ العملية على الخادم";
+}
 
 function md5Bytes(bytes) {
   const s = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
@@ -258,6 +286,7 @@ async function loadSubscribers() {
     const live = omap[uid];
     return {
       id: uid, username: u.username || "", fullName: (fn + " " + ln).trim() || u.username,
+      profileId: Number(u.profile_id || 0),
       profile: (u.profile_details && u.profile_details.name) || u.profile_name || "—",
       expiration: u.expiration || "—", days: Number(u.remaining_days || 0),
       isOnline: Number(u.online_status) === 1 || !!live, isActive: !!(u.status && u.status.status),
@@ -284,41 +313,39 @@ function renderList() {
   });
   const el = document.getElementById("subsList");
   if (!list.length) { el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">لا توجد نتائج</div>'; return; }
-  el.innerHTML = list.map(s => `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><span class="dot ${s.isOnline?'on':''}"></span><b>${s.fullName}</b> <span style="font-size:12px;color:#38BDF8" dir="ltr">@${s.username}</span></div><span class="tag ${s.isActive?'act':'exp'}">${s.isActive?'نشط':'منتهي'}</span></div><div class="meta">الباقة: <b>${s.profile}</b> • المتبقي: <b>${s.days} يوم</b><br>الانتهاء: <span dir="ltr">${s.expiration}</span>${s.ip?' • IP: <span dir="ltr">'+s.ip+'</span>':''}</div><div style="display:flex;gap:7px;margin-top:9px"><button type="button" class="btn btn-sm btn-ghost" onclick="openDetails(${s.id},'${s.username}')">التفاصيل</button>${s.isOnline&&s.rad?`<button type="button" class="btn btn-sm btn-red" onclick="disconnectSub(${s.rad},'${s.username}')">فصل</button>`:''}</div></div>`).join("");
+  el.innerHTML = list.map(s => `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><span class="dot ${s.isOnline?'on':''}"></span><b>${s.fullName}</b> <span style="font-size:12px;color:#38BDF8" dir="ltr">@${s.username}</span></div>
+      <span class="tag ${s.isActive?'act':'exp'}">${s.isActive?'نشط':'منتهي'}</span>
+    </div>
+    <div class="meta">الباقة: <b>${s.profile}</b> • المتبقي: <b>${s.days} يوم</b><br>الانتهاء: <span dir="ltr">${s.expiration}</span>${s.ip?' • IP: <span dir="ltr">'+s.ip+'</span>':''}</div>
+    <div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap">
+      <button type="button" class="btn btn-sm btn-green" onclick="openRenew(${s.id})">تجديد / تفعيل</button>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="openDetails(${s.id},'${s.username}')">التفاصيل</button>
+      ${s.isOnline&&s.rad?`<button type="button" class="btn btn-sm btn-red" onclick="disconnectSub(${s.rad},'${s.username}')">فصل</button>`:''}
+    </div>
+  </div>`).join("");
 }
 
-async function openDetails(uid, uname) {
-  document.getElementById("modalTitle").textContent = "المشترك: " + uname;
-  const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
-  document.getElementById("detailModal").style.display = "flex";
-  const r = await sasReq("GET", "user/overview/" + uid);
-  if (r.ok && r.json && r.json.data) {
-    const d = r.json.data;
-    b.innerHTML = `كلمة المرور: <b dir="ltr">${d.password||'—'}</b><br>الهاتف: <b dir="ltr">${d.phone||'—'}</b><br>العنوان: <b>${d.address||'—'}</b><br>آخر اتصال: <span dir="ltr">${d.last_online||'—'}</span>`;
-  } else b.textContent = "تعذر جلب التفاصيل.";
-}
+async function openRenew(uid) {
+  const modal = document.getElementById("renewModal");
+  const box = document.getElementById("renewContent");
+  const sub = allSubs.find(x => x.id === uid);
+  document.getElementById("renewTitle").textContent = "تجديد: " + (sub ? sub.fullName : uid);
+  box.innerHTML = "جاري جلب بيانات الباقة والرصيد...";
+  modal.style.display = "flex";
 
-async function disconnectSub(rad, uname) {
-  if (!confirm("فصل اتصال " + uname + "؟")) return;
-  await sasReq("GET", "user/disconnect/acctid/" + rad);
-  loadSubscribers();
-}
+  const [rAct, rExt, rAllowed, rProfs] = await Promise.all([
+    sasReq("GET", "user/activationData/" + uid),
+    sasReq("GET", "user/extensionData/" + uid),
+    sasReq("GET", "allowedExtensions/3"),
+    profilesCache.length ? Promise.resolve({ ok: true, json: { data: profilesCache } }) : sasReq("GET", "list/profile/0")
+  ]);
 
-function logout() { localStorage.removeItem("sas4_token"); document.getElementById("appView").style.display = "none"; document.getElementById("loginView").style.display = "flex"; }
-
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("username").value = gs("sas4_user");
-  document.getElementById("password").value = gs("sas4_pass");
-  if (gs("sas4_proxy")) document.getElementById("proxyUrl").value = gs("sas4_proxy");
-  if (gs("sas4_login_url")) document.getElementById("loginUrl").value = gs("sas4_login_url");
-  if (gs("sas4_token")) {
-    document.getElementById("loginView").style.display = "none";
-    document.getElementById("appView").style.display = "block";
-    document.getElementById("agentLabel").textContent = "الوكيل: " + gs("sas4_user");
-    refreshAll();
+  if (!rAct.ok || !rAct.json || !rAct.json.data) {
+    box.innerHTML = '<div style="color:#FCA5A5">فشل جلب بيانات التفعيل (' + rAct.status + ')</div>';
+    return;
   }
-});
-</script>
-</body>
-  </html>
-  
+
+  const d = rAct.json.data;
+  const userPrice = Numb
