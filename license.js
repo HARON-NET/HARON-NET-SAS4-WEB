@@ -4,20 +4,18 @@ const LIC_TRIAL_DAYS = 7;
 const LIC_DAY_MS = 86400000;
 
 let _lastHaptic = 0;
-function haptic(pattern = 25) {
+function haptic(pattern = 22) {
   const now = Date.now();
-  if (now - _lastHaptic < 70) return;
+  if (now - _lastHaptic < 80) return;
   _lastHaptic = now;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
 }
 
-["touchend", "click"].forEach(evt => {
-  document.addEventListener(evt, (e) => {
-    if (e.target.closest("button, .stat-card, .sort-pill, .debt-banner, .sub-card, .icon-btn, .search-btn, .live-pill, .dev-box, summary, a")) {
-      haptic(24);
-    }
-  }, { capture: true, passive: true });
-});
+document.addEventListener("click", (e) => {
+  if (e.target.closest("button, .sort-pill, .stat-card, .debt-banner, .icon-btn, .search-btn, .live-pill, .dev-box, summary")) {
+    haptic(22);
+  }
+}, true);
 
 
 const Sas4License = (() => {
