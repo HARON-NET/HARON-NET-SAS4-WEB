@@ -10,6 +10,84 @@ function haptic(pattern = 22) {
   _lastHaptic = now;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
 }
+/* بصمة العتاد الثابتة (مثل HARON NET MANAGER) */
+async function computeHardwareCode() {
+  let gpu = "";
+  try {
+    const c = document.createElement("canvas");
+    const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+    if (gl) {
+      const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+      gpu = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    }
+  } catch (e) {}
+
+  const sw = Math.max(screen.width || 0, screen.height || 0);
+  const sh = Math.min(screen.width || 0, screen.height || 0);
+  const dpr = window.devicePixelRatio || 1;
+  const cores = navigator.hardwareConcurrency || 0;
+  const mem = navigator.deviceMemory || 0;
+  const touch = navigator.maxTouchPoints || 0;
+  const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || "";
+  const uaModel = (navigator.userAgent.match(/\(([^)]+)\)/) || ["", ""])[1]
+    .replace(/; wv\)/g, "")
+    .replace(/Chrome\/[\d.]+/g, "")
+    .trim();
+
+  const raw = [gpu, sw + "x" + sh, dpr, cores, mem, touch, tz, uaModel].join("|");
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return hex.slice(0, 5) + "-" + hex.slice(5, 10);
+}
+
+/* المخزن الثلاثي الدائم: localStorage + Cookie + IndexedDB */
+const LicVault = {
+  dbName: "HARON_SAS4_VAULT",
+  storeName: "kv",
+  _idbOp(mode, fn) {
+    return new Promise((resolve) => {
+      try {
+        const req = indexedDB.open(this.dbName, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(this.storeName);
+        req.onsuccess = () => {
+          const tx = req.result.transaction(this.storeName, mode);
+          fn(tx.objectStore(this.storeName), resolve);
+        };
+        req.onerror = () => resolve(null);
+      } catch (e) { resolve(null); }
+    });
+  },
+  _getCookie(k) {
+    const m = document.cookie.match(new RegExp("(?:^|; )" + k + "=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : "";
+  },
+  _setCookie(k, v) {
+    document.cookie = `${k}=${encodeURIComponent(v)}; max-age=315360000; path=/; SameSite=Lax`;
+  },
+  async get(k) {
+    const ls = localStorage.getItem(k) || "";
+    const ck = this._getCookie(k) || "";
+    const idb = await this._idbOp("readonly", (st, res) => {
+      const r = st.get(k);
+      r.onsuccess = () => res(r.result || "");
+      r.onerror = () => res("");
+    });
+    const val = ls || idb || ck || "";
+    if (val) await this.set(k, val); // مزامنة تلقائية للطبقات الثلاث
+    return val;
+  },
+  async set(k, v) {
+    if (!v) return;
+    try { localStorage.setItem(k, v); } catch (e) {}
+    this._setCookie(k, v);
+    await this._idbOp("readwrite", (st, res) => {
+      const r = st.put(v, k);
+      r.onsuccess = () => res(true);
+      r.onerror = () => res(false);
+    });
+  }
+};
+
 
 document.addEventListener("click", (e) => {
   if (e.target.closest("button, .sort-pill, .stat-card, .debt-banner, .icon-btn, .search-btn, .live-pill, .dev-box, summary")) {
