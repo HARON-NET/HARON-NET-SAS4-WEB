@@ -145,19 +145,22 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
   <!-- Main Dashboard View -->
   <div id="appView" style="display:none">
     <div class="topbar">
+        <div class="topbar">
       <div>
         <div class="brand-row">
           <span class="brand-title">HARON NET • SAS4</span>
           <span id="livePill" class="live-pill" onclick="toggleLive()">● مباشر</span>
         </div>
-        <div class="bal-line">الرصيد: <b id="mBalance" style="color:#38BDF8">—</b> &nbsp;•&nbsp; <b id="mPoints" style="color:#FBBF24">—</b> نقطة</div>
+        <div class="bal-line">الرصيد: <b id="mBalance" dir="ltr" style="color:#38BDF8">—</b> &nbsp;•&nbsp; <b id="mPoints" style="color:#FBBF24">—</b> نقطة</div>
       </div>
       <div class="icon-grp">
+        <button id="fsBtn" type="button" class="icon-btn" title="ملء الشاشة" onclick="toggleFullScreen()">⛶</button>
         <button type="button" class="icon-btn" title="تحديث" onclick="refreshAll()">↻</button>
         <button type="button" class="icon-btn" title="سجل التفعيلات" onclick="openHistory()">💰</button>
         <button type="button" class="icon-btn" title="الضبط" onclick="openSettingsModal()">⚙️</button>
       </div>
     </div>
+
 
     <!-- 6 Stats Cards -->
     <div class="grid6">
@@ -302,6 +305,19 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
     .catch(() => {});
 })();
 </script>
+  <script>
+function toggleFullScreen() {
+  const doc = document.documentElement;
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    if (doc.requestFullscreen) doc.requestFullscreen().catch(() => {});
+    else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+  </script>
+  
 </body>
 </html>
 
