@@ -4,7 +4,7 @@ window.onerror = function(m) {
 };
 
 const SAS4_KEY = "abcdefghijuklmno0123456789012345";
-let allSubs = [], currentFilter = "all", profilesCache = [], octetSnaps = {}, liveTimer = null;
+let allSubs = [], currentFilter = "online", sortMode = "default", profilesCache = [], octetSnaps = {}, liveTimer = null;
 
 const gs = (k, d = "") => localStorage.getItem(k) || d;
 const ss = (k, v) => localStorage.setItem(k, v);
@@ -75,7 +75,7 @@ async function encSas(obj) {
   return btoa(s);
 }
 
-function setStatus(m, c) { const b = document.getElementById("statusBox"); b.style.color = c || "#94A3B8"; b.textContent = m; }
+function setStatus(m, c) { const b = document.getElementById("statusBox"); if (b) { b.style.color = c || "#94A3B8"; b.textContent = m; } }
 
 async function apiCall(method, target, obj = null, auth = true) {
   const proxy = gs("sas4_proxy", "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev").trim().replace(/\/+$/, "");
@@ -111,7 +111,7 @@ async function doLogin(silent = false) {
       if (!silent) {
         document.getElementById("loginView").style.display = "none";
         document.getElementById("appView").style.display = "block";
-        document.getElementById("agentLabel").textContent = "الوكيل: " + user;
+        startLiveLoop();
         refreshAll();
       }
       return true;
@@ -136,13 +136,18 @@ async function sasReq(m, p, o = null) {
 function refreshAll() { loadMetrics(); loadSubs(); }
 
 async function loadMetrics() {
-  const ks = ["wd_balance","wd_users_online","wd_users_active_count","wd_users_expired_count","wd_users_expiring_today","wd_users_expiring_in_3_days","wd_reward_points","wd_fup_online"];
-  const ids = ["mBalance","mOnline","mActive","mExpired","mToday","m3Days","mPoints","mFup"];
+  const ks = ["wd_balance","wd_reward_points","wd_users_count","wd_users_online","wd_users_active_count","wd_users_expired_count","wd_users_expiring_in_3_days"];
   const rs = await Promise.all(ks.map(k => sasReq("GET", "widgetData/internal/" + k)));
-  rs.forEach((r, i) => {
-    const el = document.getElementById(ids[i]);
-    if (el && r.ok && r.json && r.json.data !== undefined) el.textContent = r.json.data;
-  });
+  const get = i => (rs[i] && rs[i].ok && rs[i].json && rs[i].json.data !== undefined) ? rs[i].json.data : null;
+  if (get(0) !== null) document.getElementById("mBalance").textContent = get(0);
+  if (get(1) !== null) document.getElementById("mPoints").textContent = get(1);
+  if (get(2) !== null) document.getElementById("mTotal").textContent = get(2);
+  const on = Number(get(3) || 0), act = Number(get(4) || 0);
+  if (get(3) !== null) document.getElementById("mOnline").textContent = on;
+  if (get(4) !== null) document.getElementById("mActive").textContent = act;
+  if (get(3) !== null && get(4) !== null) document.getElementById("mOffline").textContent = Math.max(0, act - on);
+  if (get(5) !== null) document.getElementById("mExpired").textContent = get(5);
+  if (get(6) !== null) document.getElementById("mExpiring").textContent = get(6);
 }
 
 function computeRates(uid, inB, outB, now) {
@@ -170,11 +175,7 @@ async function fetchOnlineMap() {
       const id = x.user_details && Number(x.user_details.id);
       if (id > 0) {
         const rt = computeRates(id, Number(x.acctinputoctets || 0), Number(x.acctoutputoctets || 0), now);
-        om[id] = {
-          rad: x.radacctid || x.id || 0, ip: x.framedipaddress || "", mac: x.callingstationid || "",
-          nas: (x.nas_details && x.nas_details.shortname) || "", uptime: Number(x.acctsessiontime || 0),
-          dn: rt.dn, up: rt.up
-        };
+        om[id] = { rad: x.radacctid || x.id || 0, ip: x.framedipaddress || "", mac: x.callingstationid || "", nas: (x.nas_details && x.nas_details.shortname) || "", uptime: Number(x.acctsessiontime || 0), dn: rt.dn, up: rt.up };
       }
     });
   }
@@ -194,8 +195,9 @@ async function loadSubs(silent = false) {
   }
   allSubs = ru.json.data.map(u => {
     const id = Number(u.id), fn = (u.firstname && u.firstname !== "فارغ") ? u.firstname : "", ln = u.lastname || "", lv = om[id];
+    const fullName = (fn + " " + ln).trim() || u.username || "—";
     return {
-      id, username: u.username || "", fullName: (fn + " " + ln).trim() || u.username,
+      id, username: u.username || "", fullName, initial: fullName.trim().charAt(0) || "م",
       profile: (u.profile_details && u.profile_details.name) || u.profile_name || "—",
       expiration: u.expiration || "—", days: Number(u.remaining_days || 0),
       isOnline: Number(u.online_status) === 1 || !!lv, isActive: !!(u.status && u.status.status),
@@ -205,60 +207,140 @@ async function loadSubs(silent = false) {
       uptime: lv ? lv.uptime : 0, dn: lv ? lv.dn : 0, up: lv ? lv.up : 0
     };
   });
-  allSubs.sort((a, b) => (b.isOnline - a.isOnline) || (b.isActive - a.isActive));
-  document.getElementById("cAll").textContent = allSubs.length;
-  document.getElementById("cOn").textContent = allSubs.filter(x => x.isOnline).length;
-  document.getElementById("cAct").textContent = allSubs.filter(x => x.isActive).length;
-  document.getElementById("cExp").textContent = allSubs.filter(x => !x.isActive).length;
+  const debtors = allSubs.filter(x => x.loan > 0);
+  const debtSum = debtors.reduce((acc, x) => acc + x.loan, 0);
+  document.getElementById("mDebtCount").textContent = debtors.length;
+  document.getElementById("mDebtTotal").textContent = debtSum.toLocaleString("en-US") + " IQD";
   renderList();
 }
 
-function toggleLive(btn) {
+function startLiveLoop() {
+  if (liveTimer) clearInterval(liveTimer);
+  const pill = document.getElementById("livePill");
+  if (pill) { pill.textContent = "● مباشر"; pill.classList.remove("off"); }
+  liveTimer = setInterval(async () => {
+    const om = await fetchOnlineMap();
+    allSubs.forEach(s => {
+      const lv = om[s.id];
+      if (lv) { s.isOnline = true; s.rad = lv.rad; s.ip = lv.ip; s.mac = lv.mac; s.nas = lv.nas; s.uptime = lv.uptime; s.dn = lv.dn; s.up = lv.up; }
+      else { s.isOnline = false; s.dn = 0; s.up = 0; }
+    });
+    renderList();
+  }, 4000);
+}
+
+function toggleLive() {
+  const pill = document.getElementById("livePill");
   if (liveTimer) {
     clearInterval(liveTimer); liveTimer = null;
-    btn.textContent = "مباشر: متوقف"; btn.className = "btn btn-sm btn-ghost";
+    pill.textContent = "● متوقف"; pill.classList.add("off");
   } else {
-    btn.textContent = "مباشر: شغال ●"; btn.className = "btn btn-sm btn-green";
-    liveTimer = setInterval(async () => {
-      const om = await fetchOnlineMap();
-      allSubs.forEach(s => {
-        const lv = om[s.id];
-        if (lv) { s.isOnline = true; s.rad = lv.rad; s.ip = lv.ip; s.mac = lv.mac; s.nas = lv.nas; s.uptime = lv.uptime; s.dn = lv.dn; s.up = lv.up; }
-        else { s.isOnline = false; s.dn = 0; s.up = 0; }
-      });
-      renderList();
-    }, 5000);
+    startLiveLoop();
   }
 }
 
-function setFilter(f, el) { currentFilter = f; document.querySelectorAll(".pill").forEach(p => p.classList.remove("on")); el.classList.add("on"); renderList(); }
+function setFilter(f) {
+  currentFilter = (f === "debts" && currentFilter === "debts") ? "all" : f;
+  document.querySelectorAll(".stat-card").forEach(c => c.classList.remove("on"));
+  const activeEl = document.getElementById("fc-" + currentFilter);
+  if (activeEl) activeEl.classList.add("on");
+  document.getElementById("debtCard").classList.toggle("on", currentFilter === "debts");
+  renderList();
+}
+
+function setSort(m, el) {
+  sortMode = m;
+  document.querySelectorAll(".sort-pill").forEach(p => p.classList.remove("on"));
+  el.classList.add("on");
+  renderList();
+}
+
+function toggleSearch() {
+  const sb = document.getElementById("searchBox");
+  const show = sb.style.display === "none";
+  sb.style.display = show ? "block" : "none";
+  if (show) sb.focus(); else { sb.value = ""; renderList(); }
+}
 
 function renderList() {
   const q = document.getElementById("searchBox").value.trim().toLowerCase();
-  const list = allSubs.filter(s =>
-    (currentFilter !== "online" || s.isOnline) &&
-    (currentFilter !== "active" || s.isActive) &&
-    (currentFilter !== "expired" || !s.isActive) &&
-    (!q || s.username.toLowerCase().includes(q) || s.fullName.toLowerCase().includes(q) || s.profile.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q) || s.mac.toLowerCase().includes(q))
-  );
+  let list = allSubs.filter(s => {
+    if (currentFilter === "online" && !s.isOnline) return false;
+    if (currentFilter === "offline" && (!s.isActive || s.isOnline)) return false;
+    if (currentFilter === "active" && !s.isActive) return false;
+    if (currentFilter === "expired" && s.isActive) return false;
+    if (currentFilter === "expiring" && (!s.isActive || s.days > 3)) return false;
+    if (currentFilter === "debts" && s.loan <= 0) return false;
+    return !q || s.username.toLowerCase().includes(q) || s.fullName.toLowerCase().includes(q) || s.profile.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q);
+  });
+
+  list.sort((a, b) => {
+    if (sortMode === "down") return (b.dn - a.dn) || (b.isOnline - a.isOnline);
+    if (sortMode === "up") return (b.up - a.up) || (b.isOnline - a.isOnline);
+    if (sortMode === "debt") return (b.loan - a.loan);
+    if (sortMode === "days") return (a.days - b.days);
+    return (b.isOnline - a.isOnline) || (b.isActive - a.isActive) || a.username.localeCompare(b.username, undefined, { numeric: true });
+  });
+
   const el = document.getElementById("subsList");
-  if (!list.length) { el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">لا توجد نتائج</div>'; return; }
-  el.innerHTML = list.map(s => `<div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div><span class="dot ${s.isOnline ? 'on' : ''}"></span><b>${s.fullName}</b> <span style="font-size:12px;color:#38BDF8" dir="ltr">@${s.username}</span></div>
-      <span class="tag ${s.isActive ? 'act' : 'exp'}">${s.isActive ? 'نشط' : 'منتهي'}</span>
+  if (!list.length) { el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">لا توجد نتائج مطابقة</div>'; return; }
+
+  el.innerHTML = list.map(s => {
+    const avCls = s.isOnline ? "av-on" : (s.isActive ? "av-act" : "av-exp");
+    const stCls = s.isOnline ? "st-on" : (s.isActive ? "st-act" : "st-exp");
+    const stTxt = s.isOnline ? "● متصل" : (s.isActive ? "● فعال" : "● منتهي");
+    const dCls = !s.isActive ? "d-exp" : (s.days <= 3 ? "d-warn" : "d-ok");
+    const dTxt = !s.isActive ? "منتهي" : `متبقي ${s.days} يوم`;
+    const expDate = (s.expiration || "—").slice(0, 10);
+    return `<div class="sub-card" onclick="openDetails(${s.id})">
+      <div class="sub-top">
+        <div class="sub-user">
+          <div class="avatar ${avCls}">${s.initial}</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#F8FAFC">${s.fullName}</div>
+            <div style="font-size:12px;color:#94A3B8;margin-top:1px" dir="ltr">${s.username}</div>
+          </div>
+        </div>
+        <span class="st-badge ${stCls}">${stTxt}</span>
+      </div>
+      <div class="sub-mid">
+        <span class="prof-pill">${s.profile}</span>
+        <span dir="ltr" style="font-weight:700"><span style="color:#38BDF8">↓ ${s.dn.toFixed(1)}</span> &nbsp;<span style="color:#4ADE80">↑ ${s.up.toFixed(1)}</span> <span style="color:#64748B">Mbps</span></span>
+        <span class="days-pill ${dCls}">${dTxt}</span>
+      </div>
+      <div class="sub-bot">
+        <span>ينتهي: <span dir="ltr">${expDate}</span>${s.loan > 0 ? ' • دين: <b style="color:#FBBF24">' + s.loan + '</b>' : ''}</span>
+        <span style="color:#38BDF8;font-weight:700">التفاصيل ‹</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function openDetails(uid) {
+  const s = allSubs.find(x => x.id === uid);
+  document.getElementById("modalTitle").textContent = s ? s.fullName : uid;
+  const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
+  document.getElementById("detailModal").style.display = "flex";
+  const r = await sasReq("GET", "user/overview/" + uid);
+  const d = (r.ok && r.json && r.json.data) ? r.json.data : {};
+  const ph = (d.phone || "").replace(/[^0-9+]/g, "");
+  const wa = ph ? "https://wa.me/" + ph.replace(/^0/, "964").replace(/^\+/, "") : "";
+  b.innerHTML = `
+    <div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap">
+      <button type="button" class="btn btn-sm btn-green" onclick="document.getElementById('detailModal').style.display='none';openRenew(${uid})">تجديد / تفعيل</button>
+      ${s && s.isOnline && s.rad ? `<button type="button" class="btn btn-sm btn-red" onclick="disconnectSub(${s.rad})">فصل الاتصال</button>` : ''}
+      <button type="button" class="btn btn-sm btn-ghost" onclick="copyText('User: ${s ? s.username : ''}\\nPass: ${d.password || ''}', this)">نسخ الحساب</button>
+      ${ph ? `<a class="btn btn-sm btn-ghost" style="text-decoration:none" href="tel:${ph}">اتصال</a><a class="btn btn-sm btn-wa" style="text-decoration:none" target="_blank" href="${wa}">واتساب</a>` : ''}
     </div>
-    <div class="meta">
-      الباقة: <b>${s.profile}</b> • المتبقي: <b>${s.days} يوم</b>${s.loan > 0 ? ' • دين: <b style="color:#FBBF24">' + s.loan + '</b>' : ''}<br>
-      الانتهاء: <span dir="ltr">${s.expiration}</span> • استهلاك اليوم: <b>${fmtBytes(s.traffic)}</b>
-      ${s.isOnline ? `<br>IP: <span dir="ltr" style="color:#CBD5E1">${s.ip || '—'}</span> • المدة: <b>${fmtUptime(s.uptime)}</b>${s.nas ? ' • ' + s.nas : ''}${(s.dn > 0 || s.up > 0) ? `<br>السرعة: <b style="color:#4ADE80" dir="ltr">↓${s.dn.toFixed(1)}M</b> / <b style="color:#38BDF8" dir="ltr">↑${s.up.toFixed(1)}M</b>` : ''}` : ''}
-    </div>
-    <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
-      <button type="button" class="btn btn-sm btn-green" onclick="openRenew(${s.id})">تجديد / تفعيل</button>
-      <button type="button" class="btn btn-sm btn-ghost" onclick="openDetails(${s.id})">التفاصيل</button>
-      ${s.isOnline && s.rad ? `<button type="button" class="btn btn-sm btn-red" onclick="disconnectSub(${s.rad})">فصل</button>` : ''}
-    </div>
-  </div>`).join("");
+    <div class="box">
+      اليوزر: <b dir="ltr">${s ? s.username : ''}</b> • كلمة المرور: <b dir="ltr">${d.password || '—'}</b><br>
+      الباقة: <b>${s ? s.profile : '—'}</b> • الانتهاء: <span dir="ltr">${s ? s.expiration : '—'}</span><br>
+      IP: <span dir="ltr">${(s && s.ip) || '—'}</span> • MAC: <span dir="ltr">${(s && s.mac) || '—'}</span><br>
+      السيرفر: <b>${(s && s.nas) || '—'}</b> • مدة الاتصال: <b>${fmtUptime(s && s.uptime)}</b><br>
+      استهلاك اليوم: <b>${fmtBytes(s && s.traffic)}</b> • الديون: <b style="color:#FBBF24">${s ? s.loan : 0} IQD</b><br>
+      الهاتف: <b dir="ltr">${d.phone || '—'}</b> • العنوان: <b>${d.address || '—'}</b><br>
+      آخر اتصال: <span dir="ltr">${d.last_online || '—'}</span>
+    </div>`;
 }
 
 async function openRenew(uid) {
@@ -278,94 +360,4 @@ async function openRenew(uid) {
   if (re.ok && re.json && re.json.data && re.json.data.reward_points_balance !== undefined) pts = Number(re.json.data.reward_points_balance);
   if (rl.ok && rl.json && Array.isArray(rl.json.data) && rl.json.data.length) { extId = Number(rl.json.data[0].id || 24); extName = rl.json.data[0].name || "Test"; }
   const opts = profilesCache.map(p => `<option value="${p.id}" ${Number(p.id) === Number(d.profile_id) ? 'selected' : ''}>${p.name}</option>`).join("");
-  box.innerHTML = `<div class="box">المشترك: <b dir="ltr">${d.username || ''}</b><br>الباقة: <b>${d.profile_name || '—'}</b> (${d.profile_duration || '30 day(s)'})<br>الانتهاء: <span dir="ltr">${d.user_expiration || '—'}</span><br>السعر: <b style="color:#38BDF8">${d.unit_price || pr}</b> • رصيدك: <b style="color:#4ADE80">${d.manager_balance || '—'}</b><br>النقاط: <b>${pts}</b></div>
-  <label>عدد الوحدات</label><select id="actUnits"><option value="1" selected>1 وحدة (${pr})</option><option value="2">2 وحدة (${pr * 2})</option><option value="3">3 وحدات (${pr * 3})</option></select>
-  <button id="bAct" type="button" class="btn btn-green" onclick="doAct(${uid},${pr})">تأكيد التفعيل بالرصيد</button>
-  <div class="sep"><label>تغيير الباقة فوراً</label><div style="display:flex;gap:6px"><select id="pSel" style="margin:0">${opts}</select><button id="bProf" type="button" class="btn btn-sm btn-ghost" onclick="doProf(${uid})">تغيير</button></div></div>
-  <div class="sep"><button id="bExt" type="button" class="btn btn-amber" onclick="doExt(${uid},${extId})">تمديد بالنقاط (${extName})</button></div>
-  <div id="rMsg" class="status" style="display:none"></div>`;
-}
-
-function rMsg(t, ok) { const e = document.getElementById("rMsg"); if (e) { e.style.display = "block"; e.style.color = ok ? "#4ADE80" : "#FCA5A5"; e.textContent = t; } }
-
-async function doAct(uid, pr) {
-  const u = Number(document.getElementById("actUnits").value || 1);
-  if (!confirm("تأكيد تفعيل الاشتراك (" + u + " وحدة)؟")) return;
-  const b = document.getElementById("bAct"); b.disabled = true; rMsg("جاري التفعيل...", true);
-  const r = await sasReq("POST", "user/activate", { method: "credit", pin: "", user_id: String(uid), money_collected: 1, comments: null, user_price: pr, issue_invoice: 0, transaction_id: uuid(), activation_units: u });
-  b.disabled = false;
-  if (r.ok && r.json && Number(r.json.status) === 200) { rMsg("تم تفعيل اشتراك المشترك بنجاح", true); refreshAll(); }
-  else rMsg(trMsg(r.json && r.json.message), false);
-}
-
-async function doExt(uid, eid) {
-  if (!confirm("تأكيد التمديد بالنقاط؟")) return;
-  const b = document.getElementById("bExt"); b.disabled = true; rMsg("جاري التمديد...", true);
-  const r = await sasReq("POST", "user/extend", { user_id: String(uid), profile_id: String(eid), method: "reward_points", transaction_id: uuid() });
-  b.disabled = false;
-  if (r.ok && r.json && Number(r.json.status) === 200) { rMsg("تم تمديد الاشتراك بنجاح", true); refreshAll(); }
-  else rMsg(trMsg(r.json && r.json.message), false);
-}
-
-async function doProf(uid) {
-  const pid = Number(document.getElementById("pSel").value); if (!pid) return;
-  const b = document.getElementById("bProf"); b.disabled = true; rMsg("جاري تغيير الباقة...", true);
-  const r = await sasReq("POST", "user/changeProfile", { user_id: String(uid), profile_id: pid, change_type: "immediate" });
-  b.disabled = false;
-  if (r.ok && r.json && Number(r.json.status) === 200) { rMsg("تم تغيير الباقة فوراً", true); refreshAll(); }
-  else rMsg(trMsg(r.json && r.json.message), false);
-}
-
-async function openHistory() {
-  document.getElementById("modalTitle").textContent = "سجل التفعيلات";
-  const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
-  document.getElementById("detailModal").style.display = "flex";
-  const r = await sasReq("POST", "index/activations", { page: 1, count: 30, sortBy: "id", direction: "desc", search: "", columns: ["created_at","username","firstname","lastname","username","name","price","user_price","old_expiration","new_expiration","activation_method","user_activations_count","refunded"] });
-  if (r.ok && r.json && Array.isArray(r.json.data) && r.json.data.length) {
-    b.innerHTML = r.json.data.map(o => `<div class="box"><b dir="ltr" style="color:#38BDF8">@${(o.user_details && o.user_details.username) || '—'}</b> • <b>${(o.profile_details && o.profile_details.name) || '—'}</b><br>السعر: <b>${o.price || '0'}</b> • الانتهاء: <span dir="ltr">${o.new_expiration || '—'}</span><br><small style="color:#64748B" dir="ltr">${o.created_at || ''}</small></div>`).join("");
-  } else b.textContent = "لا توجد تفعيلات حديثة.";
-}
-
-async function openDetails(uid) {
-  const s = allSubs.find(x => x.id === uid);
-  document.getElementById("modalTitle").textContent = "المشترك:" + (s ? s.username : uid);
-  const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
-  document.getElementById("detailModal").style.display = "flex";
-  const r = await sasReq("GET", "user/overview/" + uid);
-  if (r.ok && r.json && r.json.data) {
-    const d = r.json.data, ph = (d.phone || "").replace(/[^0-9+]/g, "");
-    const wa = ph ? "https://wa.me/" + ph.replace(/^0/, "964").replace(/^\+/, "") : "";
-    b.innerHTML = `<div class="box">
-      اليوزر: <b dir="ltr">${s ? s.username : ''}</b><br>
-      كلمة المرور: <b dir="ltr">${d.password || '—'}</b><br>
-      الهاتف: <b dir="ltr">${d.phone || '—'}</b><br>
-      العنوان: <b>${d.address || '—'}</b><br>
-      MAC: <span dir="ltr">${(s && s.mac) || '—'}</span><br>
-      آخر اتصال: <span dir="ltr">${d.last_online || '—'}</span><br>
-      أُنشئ بواسطة: <b>${d.created_by || '—'}</b> (<span dir="ltr">${d.created_at || '—'}</span>)
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button type="button" class="btn btn-sm btn-ghost" onclick="copyText('User: ${s ? s.username : ''}\\nPass: ${d.password || ''}', this)">نسخ اليوزر والباسورد</button>
-      ${ph ? `<a class="btn btn-sm btn-ghost" style="text-decoration:none" href="tel:${ph}">اتصال</a><a class="btn btn-sm btn-green" style="text-decoration:none" target="_blank" href="${wa}">واتساب</a>` : ''}
-    </div>`;
-  } else b.textContent = "تعذر جلب التفاصيل.";
-}
-
-async function disconnectSub(rad) { if (!confirm("فصل اتصال المشترك؟")) return; await sasReq("GET", "user/disconnect/acctid/" + rad); loadSubs(true); }
-function logout() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } localStorage.removeItem("sas4_token"); document.getElementById("appView").style.display = "none"; document.getElementById("loginView").style.display = "flex"; }
-
-window.addEventListener("DOMContentLoaded", () => {
-  var lb = document.getElementById("loginBtn");
-  if (lb) lb.addEventListener("click", function() { doLogin(); });
-  document.getElementById("username").value = gs("sas4_user");
-  document.getElementById("password").value = gs("sas4_pass");
-  if (gs("sas4_proxy")) document.getElementById("proxyUrl").value = gs("sas4_proxy");
-  if (gs("sas4_login_url")) document.getElementById("loginUrl").value = gs("sas4_login_url");
-  if (gs("sas4_token")) {
-    document.getElementById("loginView").style.display = "none";
-    document.getElementById("appView").style.display = "block";
-    document.getElementById("agentLabel").textContent = "الوكيل: " + gs("sas4_user");
-    refreshAll();
-  }
-});
-                                   
+  box.innerHTML = `<div class="box">المشترك: <b dir="ltr">${d.username || ''}</b><br>الباقة: <b>${d.profile_name || '—'}</b> (${d.profile_durat
