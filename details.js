@@ -81,6 +81,9 @@ function saveDevCfg(uid) {
 }
 
 window.openDetails = async function(uid) {
+  if (!(history.state && history.state.subDetail)) {
+    history.pushState({ subDetail: uid }, "");
+  }
   activeDetailUid = uid;
   activeDetailTab = "info";
   loadSavedDevCfg(uid);
