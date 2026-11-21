@@ -2,21 +2,24 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#080C12">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HARON SAS4">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="haron_sas4_pwa_icon_1024.png">
 <title>HARON NET SAS4</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  
 <style>
 *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:#080C12;color:#F8FAFC;padding:14px 13px 32px}
-.wrap{max-width:500px;margin:0 auto}
+html,body{margin:0;padding:0;width:100%;min-height:100dvh;background:#080C12;color:#F8FAFC;overflow-x:hidden}
+body{padding:calc(12px + env(safe-area-inset-top)) 13px calc(28px + env(safe-area-inset-bottom))}
+.wrap{width:100%;max-width:640px;margin:0 auto}
 .card{background:#121822;border:1px solid #1E293B;border-radius:16px;padding:14px;margin-bottom:10px}
 .badge{display:inline-block;background:rgba(56,189,248,.14);color:#38BDF8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:7px}
 h1{margin:0 0 4px;font-size:19px}
