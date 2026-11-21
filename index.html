@@ -11,46 +11,87 @@
 <title>HARON NET SAS4</title>
 <style>
 *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:#0B0F17;color:#F8FAFC;padding:15px 13px 30px}
+body{margin:0;background:#080C12;color:#F8FAFC;padding:14px 13px 32px}
 .wrap{max-width:500px;margin:0 auto}
-.card{background:#131926;border:1px solid #253047;border-radius:15px;padding:15px;margin-bottom:10px}
-.badge{display:inline-block;background:rgba(14,165,233,.15);color:#38BDF8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:7px}
+.card{background:#121822;border:1px solid #1E293B;border-radius:16px;padding:14px;margin-bottom:10px}
+.badge{display:inline-block;background:rgba(56,189,248,.14);color:#38BDF8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:7px}
 h1{margin:0 0 4px;font-size:19px}
 .sub{margin:0 0 13px;font-size:12px;color:#94A3B8}
 label{display:block;font-size:12px;color:#CBD5E1;margin-bottom:4px}
-input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:10px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
-.btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:11px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .08s ease,opacity .15s}
-.btn:active,.pill:active,.dev-box:active{transform:scale(.96)}
+input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;border-radius:11px;padding:10px 12px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
+.btn{width:100%;background:#38BDF8;color:#04131C;border:none;border-radius:12px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .08s}
+.btn:active,.stat-card:active,.sort-pill:active,.icon-btn:active,.debt-banner:active,.sub-card:active,.dev-box:active{transform:scale(.96)}
 .btn:disabled{opacity:.5}
-.btn-sm{width:auto;padding:6px 10px;font-size:12px;border-radius:8px}
+.btn-sm{width:auto;padding:7px 12px;font-size:12px;border-radius:9px}
 .btn-green{background:#16A34A;color:#fff}
-.btn-wa{background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.4);color:#4ADE80}
-.btn-amber{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45);color:#FCD34D}
-.btn-ghost{background:#1A2234;border:1px solid #253047;color:#F8FAFC}
-.btn-red{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#FCA5A5}
-.status{margin-top:10px;font-size:12px;padding:8px 10px;border-radius:9px;background:#0B0F17;border:1px solid #1E293B;color:#94A3B8;word-break:break-word}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:11px}
-.stat{background:#131926;border:1px solid #253047;border-radius:12px;padding:10px}
-.stat small{display:block;color:#94A3B8;font-size:10.5px;margin-bottom:2px}
-.stat b{font-size:16px}
-.pills{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
-.pill{background:#131926;border:1px solid #253047;color:#94A3B8;padding:5px 11px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap;transition:transform .08s}
-.pill.on{background:rgba(14,165,233,.15);border-color:#0EA5E9;color:#38BDF8;font-weight:700}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;background:#64748B}
-.dot.on{background:#22C55E;box-shadow:0 0 7px #22C55E}
-.tag{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
-.tag.act{background:rgba(34,197,94,.15);color:#4ADE80}
-.tag.exp{background:rgba(239,68,68,.15);color:#F87171}
-.meta{font-size:12px;color:#94A3B8;line-height:1.65;margin-top:5px}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:13px;z-index:50;overflow-y:auto}
-.box{background:#0B0F17;border:1px solid #1E293B;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12.5px;line-height:1.65}
-.sep{border-top:1px solid #253047;margin:11px 0;padding-top:11px}
-.dev-box{background:#0B0F17;border:1px solid #253047;border-radius:12px;padding:13px;text-align:center;font-family:monospace;font-size:19px;font-weight:800;letter-spacing:2px;color:#38BDF8;margin:8px 0 12px;cursor:pointer;transition:transform .08s}
+.btn-wa{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);color:#4ADE80}
+.btn-amber{background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.45);color:#FCD34D}
+.btn-ghost{background:#161E2B;border:1px solid #243042;color:#F8FAFC}
+.btn-red{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#FCA5A5}
+.status{margin-top:10px;font-size:12px;padding:8px 10px;border-radius:9px;background:#080C12;border:1px solid #1E293B;color:#94A3B8;word-break:break-word}
+
+/* Header */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px}
+.brand-row{display:flex;align-items:center;gap:7px}
+.brand-title{font-size:16px;font-weight:800;letter-spacing:.3px}
+.live-pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;cursor:pointer;background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.35);color:#4ADE80}
+.live-pill.off{background:#161E2B;border-color:#243042;color:#94A3B8}
+.bal-line{font-size:12px;color:#94A3B8;margin-top:3px}
+.icon-grp{display:flex;gap:7px}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:#121822;border:1px solid #222D3D;color:#CBD5E1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:transform .08s}
+
+/* 6-Card Grid */
+.grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat-card{background:#121822;border:1px solid #1E293B;border-radius:15px;padding:13px 8px;text-align:center;cursor:pointer;transition:transform .08s,border-color .15s}
+.stat-card.on{border:1.5px solid #38BDF8;background:rgba(56,189,248,.06)}
+.stat-card b{display:block;font-size:21px;font-weight:800;margin-bottom:4px}
+.stat-card small{font-size:11.5px;color:#94A3B8;font-weight:600}
+
+/* Debts Banner */
+.debt-banner{background:#121822;border:1px solid #1E293B;border-radius:15px;padding:11px 14px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:transform .08s}
+.debt-banner.on{border:1.5px solid #FBBF24;background:rgba(251,191,36,.06)}
+.debt-pill{background:#080C12;border:1px solid rgba(251,191,36,.45);color:#FBBF24;font-weight:800;font-size:12.5px;padding:4px 10px;border-radius:99px}
+
+/* Search & Sort Row */
+.bar-row{display:flex;align-items:center;gap:7px;margin-bottom:11px}
+.search-btn{width:38px;height:38px;flex-shrink:0;border-radius:12px;background:#121822;border:1px solid #1E293B;color:#94A3B8;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sort-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.sort-scroll::-webkit-scrollbar{display:none}
+.sort-pill{background:#121822;border:1px solid #1E293B;color:#CBD5E1;padding:7px 13px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;transition:transform .08s}
+.sort-pill.on{background:#38BDF8;border-color:#38BDF8;color:#04131C}
+
+/* Subscriber Card */
+.sub-card{background:#121822;border:1px solid #1E293B;border-radius:16px;padding:13px;margin-bottom:10px;cursor:pointer;transition:transform .08s}
+.sub-top{display:flex;justify-content:space-between;align-items:center}
+.sub-user{display:flex;align-items:center;gap:10px}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
+.av-on{background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35);color:#4ADE80}
+.av-act{background:rgba(56,189,248,.13);border:1px solid rgba(56,189,248,.35);color:#38BDF8}
+.av-exp{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#F87171}
+.st-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+.st-on{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#4ADE80}
+.st-act{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);color:#38BDF8}
+.st-exp{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#F87171}
+.sub-mid{background:#080C12;border-radius:11px;padding:8px 10px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11.5px}
+.prof-pill{background:rgba(56,189,248,.13);border:1px solid rgba(56,189,248,.35);color:#38BDF8;padding:3px 9px;border-radius:99px;font-weight:700;white-space:nowrap}
+.days-pill{padding:3px 9px;border-radius:99px;font-weight:700;white-space:nowrap}
+.d-ok{background:rgba(34,197,94,.14);color:#4ADE80}
+.d-warn{background:rgba(245,158,11,.16);color:#FBBF24}
+.d-exp{background:rgba(239,68,68,.15);color:#F87171}
+.sub-bot{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#94A3B8}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.84);display:none;align-items:center;justify-content:center;padding:13px;z-index:50;overflow-y:auto}
+.box{background:#080C12;border:1px solid #1E293B;border-radius:11px;padding:11px;margin-bottom:10px;font-size:12.5px;line-height:1.7}
+.sep{border-top:1px solid #1E293B;margin:11px 0;padding-top:11px}
+.dev-box{background:#080C12;border:1px solid #1E293B;border-radius:12px;padding:13px;text-align:center;font-family:monospace;font-size:19px;font-weight:800;letter-spacing:2px;color:#38BDF8;margin:8px 0 12px;cursor:pointer}
 </style>
 </head>
 <body>
+<input type="checkbox" id="iosHapticChk" switch style="position:fixed;opacity:0;pointer-events:none;width:0;height:0">
+<label id="iosHapticLbl" for="iosHapticChk" style="position:fixed;opacity:0;pointer-events:none;width:0;height:0"></label>
+
 <div class="wrap">
+  <!-- Login View -->
   <div id="loginView" style="min-height:85vh;display:flex;align-items:center">
     <div class="card" style="width:100%">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -77,43 +118,65 @@ input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;bor
     </div>
   </div>
 
+  <!-- Main Dashboard View -->
   <div id="appView" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;gap:6px;flex-wrap:wrap">
-      <div><b>HARON NET SAS4</b><div id="agentLabel" style="font-size:11.5px;color:#94A3B8"></div></div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap">
-        <button type="button" class="btn btn-sm btn-ghost" onclick="toggleLive(this)">مباشر: متوقف</button>
-        <button type="button" class="btn btn-sm btn-ghost" onclick="openHistory()">السجل</button>
-        <button type="button" class="btn btn-sm btn-ghost" onclick="refreshAll()">تحديث</button>
-        <button type="button" class="btn btn-sm btn-ghost" onclick="openSettingsModal()">الضبط</button>
-        <button type="button" class="btn btn-sm btn-red" onclick="logout()">خروج</button>
+    <div class="topbar">
+      <div>
+        <div class="brand-row">
+          <span class="brand-title">HARON NET • SAS4</span>
+          <span id="livePill" class="live-pill" onclick="toggleLive()">● مباشر</span>
+        </div>
+        <div class="bal-line">الرصيد: <b id="mBalance" style="color:#38BDF8">—</b> &nbsp;•&nbsp; <b id="mPoints" style="color:#FBBF24">—</b> نقطة</div>
+      </div>
+      <div class="icon-grp">
+        <button type="button" class="icon-btn" title="تحديث" onclick="refreshAll()">↻</button>
+        <button type="button" class="icon-btn" title="سجل التفعيلات" onclick="openHistory()">💰</button>
+        <button type="button" class="icon-btn" title="الضبط" onclick="openSettingsModal()">⚙️</button>
       </div>
     </div>
-    <div class="grid">
-      <div class="stat"><small>الرصيد المتاح</small><b id="mBalance" style="color:#38BDF8">—</b></div>
-      <div class="stat"><small>المتصلون الآن</small><b id="mOnline" style="color:#4ADE80">—</b></div>
-      <div class="stat"><small>النشطون</small><b id="mActive">—</b></div>
-      <div class="stat"><small>المنتهية اشتراكاتهم</small><b id="mExpired" style="color:#F87171">—</b></div>
+
+    <!-- 6 Stats Cards -->
+    <div class="grid6">
+      <div id="fc-all" class="stat-card" onclick="setFilter('all')"><b id="mTotal" style="color:#F8FAFC">—</b><small>الإجمالي</small></div>
+      <div id="fc-online" class="stat-card on" onclick="setFilter('online')"><b id="mOnline" style="color:#4ADE80">—</b><small>متصل</small></div>
+      <div id="fc-offline" class="stat-card" onclick="setFilter('offline')"><b id="mOffline" style="color:#F87171">—</b><small>غير متصل</small></div>
+      <div id="fc-active" class="stat-card" onclick="setFilter('active')"><b id="mActive" style="color:#38BDF8">—</b><small>الفعالين</small></div>
+      <div id="fc-expired" class="stat-card" onclick="setFilter('expired')"><b id="mExpired" style="color:#F87171">—</b><small>منتهي</small></div>
+      <div id="fc-expiring" class="stat-card" onclick="setFilter('expiring')"><b id="mExpiring" style="color:#FBBF24">—</b><small>قرب الانتهاء</small></div>
     </div>
-    <div class="grid4">
-      <div class="stat"><small>ينتهي اليوم</small><b id="mToday" style="color:#FBBF24">—</b></div>
-      <div class="stat"><small>خلال 3 أيام</small><b id="m3Days">—</b></div>
-      <div class="stat"><small>النقاط</small><b id="mPoints" style="color:#A78BFA">—</b></div>
-      <div class="stat"><small>FUP</small><b id="mFup">—</b></div>
+
+    <!-- Debts Banner -->
+    <div id="debtCard" class="debt-banner" onclick="setFilter('debts')">
+      <div>
+        <div style="font-size:13px;font-weight:700">💳 الديون (غير واصل)</div>
+        <div style="font-size:11px;color:#94A3B8;margin-top:2px">اضغط لعرض المشتركين أصحاب الديون</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <b id="mDebtCount" style="color:#FBBF24;font-size:18px">0</b>
+        <span id="mDebtTotal" class="debt-pill" dir="ltr">0 IQD</span>
+      </div>
     </div>
-    <input id="searchBox" type="search" placeholder="بحث بالاسم، اليوزر، الباقة، IP، أو MAC..." oninput="renderList()">
-    <div class="pills">
-      <div class="pill on" onclick="setFilter('all',this)">الكل (<span id="cAll">0</span>)</div>
-      <div class="pill" onclick="setFilter('online',this)">متصل (<span id="cOn">0</span>)</div>
-      <div class="pill" onclick="setFilter('active',this)">نشط (<span id="cAct">0</span>)</div>
-      <div class="pill" onclick="setFilter('expired',this)">منتهي (<span id="cExp">0</span>)</div>
+
+    <!-- Search & Sort Pills -->
+    <div class="bar-row">
+      <button type="button" class="search-btn" onclick="toggleSearch()">🔍</button>
+      <div class="sort-scroll">
+        <div class="sort-pill on" onclick="setSort('default',this)">✦ الافتراضي</div>
+        <div class="sort-pill" onclick="setSort('down',this)">↓ التنزيل</div>
+        <div class="sort-pill" onclick="setSort('up',this)">↓ الرفع</div>
+        <div class="sort-pill" onclick="setSort('debt',this)">↓ الديون</div>
+        <div class="sort-pill" onclick="setSort('days',this)">↓ المتبقي</div>
+      </div>
     </div>
+    <input id="searchBox" type="search" style="display:none" placeholder="بحث بالاسم، اليوزر، الباقة، أو IP..." oninput="renderList()">
+
     <div id="subsList"></div>
   </div>
 </div>
 
-<!-- نافذة التفاصيل / السجل -->
+<!-- Details Modal -->
 <div id="detailModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
-  <div class="card" style="width:100%;max-width:430px;max-height:85vh;overflow-y:auto">
+  <div class="card" style="width:100%;max-width:430px;max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <b id="modalTitle">التفاصيل</b>
       <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('detailModal').style.display='none'">إغلاق</button>
@@ -122,7 +185,7 @@ input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;bor
   </div>
 </div>
 
-<!-- نافذة تجديد الاشتراك -->
+<!-- Renew Modal -->
 <div id="renewModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -133,7 +196,7 @@ input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;bor
   </div>
 </div>
 
-<!-- نافذة الضبط -->
+<!-- Settings Modal -->
 <div id="settingsModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -157,12 +220,12 @@ input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;bor
       <input id="setPass" type="password" dir="ltr">
       <div id="setMsg" class="status" style="display:none;color:#FBBF24;margin-bottom:9px"></div>
       <button type="button" class="btn" onclick="saveSettingsAndConnect()">حفظ بيانات الدخول وتسجيل الاتصال</button>
-      <button type="button" class="btn btn-ghost" style="color:#FCA5A5;margin-top:8px" onclick="clearSavedSettings()">مسح بيانات الدخول المحفوظة</button>
+      <button type="button" class="btn btn-ghost" style="color:#FCA5A5;margin-top:8px" onclick="logout();document.getElementById('settingsModal').style.display='none'">تسجيل الخروج</button>
     </div>
   </div>
 </div>
 
-<!-- نافذة الاشتراك والتفعيل -->
+<!-- License Modal -->
 <div id="licenseModal" class="modal-bg" style="z-index:70" onclick="if(event.target===this&&licAllowClose)this.style.display='none'">
   <div class="card" style="width:100%;max-width:420px;max-height:92vh;overflow-y:auto">
     <b style="font-size:17px;display:block;margin-bottom:6px">الاشتراك</b>
@@ -177,8 +240,8 @@ input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;bor
   </div>
 </div>
 
-<script src="app.js?v=18"></script>
-<script src="license.js?v=18"></script>
+<script src="app.js?v=20"></script>
+<script src="license.js?v=20"></script>
 </body>
-          </html>
-                                            
+  </html>
+                                                                                                                                               
