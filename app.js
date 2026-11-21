@@ -328,4 +328,44 @@ async function openHistory() {
 
 async function openDetails(uid) {
   const s = allSubs.find(x => x.id === uid);
-  document.getElementById("modalTitle").textContent = "المشترك: 
+  document.getElementById("modalTitle").textContent = "المشترك:" + (s ? s.username : uid);
+  const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
+  document.getElementById("detailModal").style.display = "flex";
+  const r = await sasReq("GET", "user/overview/" + uid);
+  if (r.ok && r.json && r.json.data) {
+    const d = r.json.data, ph = (d.phone || "").replace(/[^0-9+]/g, "");
+    const wa = ph ? "https://wa.me/" + ph.replace(/^0/, "964").replace(/^\+/, "") : "";
+    b.innerHTML = `<div class="box">
+      اليوزر: <b dir="ltr">${s ? s.username : ''}</b><br>
+      كلمة المرور: <b dir="ltr">${d.password || '—'}</b><br>
+      الهاتف: <b dir="ltr">${d.phone || '—'}</b><br>
+      العنوان: <b>${d.address || '—'}</b><br>
+      MAC: <span dir="ltr">${(s && s.mac) || '—'}</span><br>
+      آخر اتصال: <span dir="ltr">${d.last_online || '—'}</span><br>
+      أُنشئ بواسطة: <b>${d.created_by || '—'}</b> (<span dir="ltr">${d.created_at || '—'}</span>)
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="btn btn-sm btn-ghost" onclick="copyText('User: ${s ? s.username : ''}\\nPass: ${d.password || ''}', this)">نسخ اليوزر والباسورد</button>
+      ${ph ? `<a class="btn btn-sm btn-ghost" style="text-decoration:none" href="tel:${ph}">اتصال</a><a class="btn btn-sm btn-green" style="text-decoration:none" target="_blank" href="${wa}">واتساب</a>` : ''}
+    </div>`;
+  } else b.textContent = "تعذر جلب التفاصيل.";
+}
+
+async function disconnectSub(rad) { if (!confirm("فصل اتصال المشترك؟")) return; await sasReq("GET", "user/disconnect/acctid/" + rad); loadSubs(true); }
+function logout() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } localStorage.removeItem("sas4_token"); document.getElementById("appView").style.display = "none"; document.getElementById("loginView").style.display = "flex"; }
+
+window.addEventListener("DOMContentLoaded", () => {
+  var lb = document.getElementById("loginBtn");
+  if (lb) lb.addEventListener("click", function() { doLogin(); });
+  document.getElementById("username").value = gs("sas4_user");
+  document.getElementById("password").value = gs("sas4_pass");
+  if (gs("sas4_proxy")) document.getElementById("proxyUrl").value = gs("sas4_proxy");
+  if (gs("sas4_login_url")) document.getElementById("loginUrl").value = gs("sas4_login_url");
+  if (gs("sas4_token")) {
+    document.getElementById("loginView").style.display = "none";
+    document.getElementById("appView").style.display = "block";
+    document.getElementById("agentLabel").textContent = "الوكيل: " + gs("sas4_user");
+    refreshAll();
+  }
+});
+                                   
