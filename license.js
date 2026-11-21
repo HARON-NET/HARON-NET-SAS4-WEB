@@ -18,8 +18,8 @@ document.addEventListener("click", (e) => {
   }
 }, true);
 
-/* بصمة العتاد الثابتة */
-async function computeHardwareCode() {
+/* توليد بصمة فريدة لكل آيفون (تمنع تشابه أجهزة الآيفون من نفس الموديل) */
+async function computeUniqueDeviceCode() {
   let gpu = "";
   try {
     const c = document.createElement("canvas");
@@ -34,16 +34,13 @@ async function computeHardwareCode() {
   const sh = Math.min(screen.width || 0, screen.height || 0);
   const dpr = window.devicePixelRatio || 1;
   const cores = navigator.hardwareConcurrency || 0;
-  const mem = navigator.deviceMemory || 0;
-  const touch = navigator.maxTouchPoints || 0;
   const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || "";
-  const uaModel = (navigator.userAgent.match(/\(([^)]+)\)/) || ["", ""])[1]
-    .replace(/; wv/g, "")
-    .replace(/Build\/[^\s;)]+/g, "")
-    .replace(/Chrome\/[\d.]+/g, "")
-    .trim();
 
-  const raw = [gpu, sw + "x" + sh, dpr, cores, mem, touch, tz, uaModel].join("|");
+  const rnd = new Uint8Array(16);
+  crypto.getRandomValues(rnd);
+  const rndHex = Array.from(rnd).map(b => b.toString(16).padStart(2, "0")).join("");
+
+  const raw = [gpu, sw + "x" + sh, dpr, cores, tz, rndHex, Date.now()].join("|");
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
   const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
   return hex.slice(0, 5) + "-" + hex.slice(5, 10);
@@ -131,7 +128,7 @@ const LicVault = {
   }
 };
 
-/* المزامنة السحابية الخامسة عبر Cloudflare Worker */
+/* المزامنة وقفل المفتاح عبر Cloudflare Worker */
 function getWorkerBase() {
   try {
     const saved = (localStorage.getItem("sas4_proxy") || "").trim();
@@ -141,11 +138,11 @@ function getWorkerBase() {
   }
 }
 
-async function fetchCloudVault(dev) {
+async function fetchCloudVault(id) {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 3500);
-    const r = await fetch(`${getWorkerBase()}/lic?d=${encodeURIComponent(dev)}`, {
+    const r = await fetch(`${getWorkerBase()}/lic?d=${encodeURIComponent(id)}`, {
       cache: "no-store",
       signal: ctrl.signal
     });
@@ -155,14 +152,14 @@ async function fetchCloudVault(dev) {
   } catch (e) { return null; }
 }
 
-async function pushCloudVault(dev, payload) {
+async function pushCloudVault(id, payload) {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 3500);
     await fetch(`${getWorkerBase()}/lic`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.assign({ d: dev }, payload)),
+      body: JSON.stringify(Object.assign({ d: id }, payload)),
       signal: ctrl.signal
     });
     clearTimeout(t);
@@ -171,13 +168,18 @@ async function pushCloudVault(dev, payload) {
 
 const Sas4License = (() => {
   const appTag = "sas4";
-  const hwKey = "lic_hw_device_code";
-  const clockKey = "lic_clock_state";
-  const licKey = "lic_saved_key";
+  const hwKey = "lic_ios_device_id_v3";
+  const clockKey = "lic_clock_state_v3";
+  const licKey = "lic_saved_key_v3";
   const te = new TextEncoder();
 
   function bufToHex(buf) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function sha256Hex(str) {
+    const dig = await crypto.subtle.digest("SHA-256", te.encode(str));
+    return bufToHex(dig);
   }
 
   async function hmacHex(devCode, data) {
@@ -192,7 +194,7 @@ const Sas4License = (() => {
   async function deviceCode() {
     let code = await LicVault.get(hwKey);
     if (!code || !/^[0-9A-F]{5}-[0-9A-F]{5}$/i.test(code)) {
-      code = await computeHardwareCode();
+      code = await computeUniqueDeviceCode();
       await LicVault.set(hwKey, code);
     }
     return code.toUpperCase();
@@ -340,8 +342,17 @@ const Sas4License = (() => {
       haptic([35, 45, 35]);
       return { ok: false, msg: "انتهت صلاحية هذا المفتاح" };
     }
+
     const cleanKey = raw.replace(/\s+/g, "");
+    const keyLockId = "K_" + (await sha256Hex(cleanKey)).slice(0, 20).toUpperCase();
+    const lockInfo = await fetchCloudVault(keyLockId);
+    if (lockInfo && lockInfo.key && lockInfo.key.toUpperCase() !== dev.toUpperCase()) {
+      haptic([35, 45, 35]);
+      return { ok: false, msg: "هذا المفتاح مُفعّل مسبقاً على جهاز آيفون آخر" };
+    }
+
     await LicVault.set(licKey, cleanKey);
+    await pushCloudVault(keyLockId, { key: dev, clock: "" });
     await pushCloudVault(dev, { key: cleanKey, clock: stateStr });
     haptic([20, 40, 30]);
     return { ok: true, msg: `تم التفعيل بنجاح. ينتهي الاشتراك في ${chk.payload.e}` };
@@ -400,14 +411,24 @@ async function openLicenseModal(allowClose = true) {
 
 function copyDevCode() {
   if (!currentLicStatus) return;
-  navigator.clipboard.writeText(currentLicStatus.device);
+  const code = currentLicStatus.device;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).catch(() => {});
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
   const fb = document.getElementById("licFeedback");
   fb.style.display = "block"; fb.style.color = "#38BDF8"; fb.textContent = "تم نسخ رمز الجهاز ✓";
 }
 
 function requestKeyWhatsApp() {
   if (!currentLicStatus) return;
-  const txt = `أرغب بتفعيل تطبيق HARON NET SAS4 (Web).\nرمز جهازي: ${currentLicStatus.device}`;
+  const txt = `أرغب بتفعيل تطبيق HARON NET SAS4 (iPhone).\nرمز جهازي: ${currentLicStatus.device}`;
   window.open(`https://wa.me/${Sas4License.vendorWhatsApp}?text=${encodeURIComponent(txt)}`, "_blank");
 }
 
@@ -466,4 +487,4 @@ function initLicenseGate() {
 
 window.addEventListener("DOMContentLoaded", initLicenseGate);
 if (document.readyState !== "loading") initLicenseGate();
-                                    
+                
