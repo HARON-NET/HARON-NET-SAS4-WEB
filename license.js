@@ -2,6 +2,7 @@ const LIC_PUB_SPKI = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEj0Zt28sYb358Lynxh7NpQk
 const LIC_VENDOR_WA = "9647750149398";
 const LIC_TRIAL_DAYS = 7;
 const LIC_DAY_MS = 86400000;
+const DEFAULT_LIC_WORKER = "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev";
 
 let _lastHaptic = 0;
 function haptic(pattern = 22) {
@@ -17,7 +18,7 @@ document.addEventListener("click", (e) => {
   }
 }, true);
 
-/* بصمة العتاد الثابتة (مثل HARON NET MANAGER) */
+/* بصمة العتاد الثابتة */
 async function computeHardwareCode() {
   let gpu = "";
   try {
@@ -48,10 +49,11 @@ async function computeHardwareCode() {
   return hex.slice(0, 5) + "-" + hex.slice(5, 10);
 }
 
-/* المخزن الثلاثي الدائم: localStorage + Cookie + IndexedDB */
+/* المخزن الرباعي المحلي: localStorage + IndexedDB + Cookie + CacheStorage */
 const LicVault = {
   dbName: "HARON_SAS4_VAULT",
   storeName: "kv",
+  cacheName: "HARON_SAS4_CACHE_V1",
   _idbOp(mode, fn) {
     return new Promise((resolve) => {
       let done = false;
@@ -85,6 +87,21 @@ const LicVault = {
       document.cookie = `${k}=${encodeURIComponent(v)}; max-age=315360000; path=/; SameSite=Lax`;
     } catch (e) {}
   },
+  async _getCache(k) {
+    try {
+      if (!("caches" in window)) return "";
+      const cache = await caches.open(this.cacheName);
+      const res = await cache.match("/__vault/" + k);
+      return res ? await res.text() : "";
+    } catch (e) { return ""; }
+  },
+  async _setCache(k, v) {
+    try {
+      if (!("caches" in window)) return;
+      const cache = await caches.open(this.cacheName);
+      await cache.put("/__vault/" + k, new Response(v));
+    } catch (e) {}
+  },
   async get(k) {
     let ls = "";
     try { ls = localStorage.getItem(k) || ""; } catch (e) {}
@@ -94,8 +111,9 @@ const LicVault = {
       r.onsuccess = () => res(r.result || "");
       r.onerror = () => res("");
     });
-    const val = ls || idb || ck || "";
-    if (val && (!ls || !idb || !ck)) {
+    const cs = await this._getCache(k);
+    const val = ls || idb || cs || ck || "";
+    if (val && (!ls || !idb || !cs || !ck)) {
       await this.set(k, val);
     }
     return val;
@@ -104,6 +122,7 @@ const LicVault = {
     if (!v) return;
     try { localStorage.setItem(k, v); } catch (e) {}
     this._setCookie(k, v);
+    await this._setCache(k, v);
     await this._idbOp("readwrite", (st, res) => {
       const r = st.put(v, k);
       r.onsuccess = () => res(true);
@@ -111,6 +130,44 @@ const LicVault = {
     });
   }
 };
+
+/* المزامنة السحابية الخامسة عبر Cloudflare Worker */
+function getWorkerBase() {
+  try {
+    const saved = (localStorage.getItem("sas4_proxy") || "").trim();
+    return (saved || DEFAULT_LIC_WORKER).replace(/\/+$/, "");
+  } catch (e) {
+    return DEFAULT_LIC_WORKER;
+  }
+}
+
+async function fetchCloudVault(dev) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3500);
+    const r = await fetch(`${getWorkerBase()}/lic?d=${encodeURIComponent(dev)}`, {
+      cache: "no-store",
+      signal: ctrl.signal
+    });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
+async function pushCloudVault(dev, payload) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3500);
+    await fetch(`${getWorkerBase()}/lic`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.assign({ d: dev }, payload)),
+      signal: ctrl.signal
+    });
+    clearTimeout(t);
+  } catch (e) {}
+}
 
 const Sas4License = (() => {
   const appTag = "sas4";
@@ -141,10 +198,11 @@ const Sas4License = (() => {
     return code.toUpperCase();
   }
 
-  async function monotonicClock(dev) {
+  async function monotonicClock(dev, cloudClock = "") {
     const now = Date.now();
     let start = Infinity, last = 0;
-    const raw = await LicVault.get(clockKey);
+    let raw = await LicVault.get(clockKey);
+    if (!raw && cloudClock) raw = cloudClock;
     if (raw) {
       const parts = raw.trim().split(":");
       if (parts.length === 3) {
@@ -158,8 +216,9 @@ const Sas4License = (() => {
     if (!Number.isFinite(start)) start = now;
     const eff = Math.max(now, last);
     const sig = await hmacHex(dev, `${appTag}|${dev}|${start}|${eff}`);
-    await LicVault.set(clockKey, `${start}:${eff}:${sig}`);
-    return { start, now: eff };
+    const stateStr = `${start}:${eff}:${sig}`;
+    await LicVault.set(clockKey, stateStr);
+    return { start, now: eff, stateStr };
   }
 
   function b64UrlToBytes(input) {
@@ -230,8 +289,24 @@ const Sas4License = (() => {
 
   async function status() {
     const dev = await deviceCode();
-    const { start, now } = await monotonicClock(dev);
-    const saved = await LicVault.get(licKey);
+    let saved = await LicVault.get(licKey);
+    let cloud = null;
+
+    if (!saved) {
+      cloud = await fetchCloudVault(dev);
+      if (cloud && cloud.key) {
+        saved = cloud.key;
+        await LicVault.set(licKey, saved);
+      }
+    }
+
+    const { start, now, stateStr } = await monotonicClock(dev, cloud && cloud.clock ? cloud.clock : "");
+    if (saved) {
+      pushCloudVault(dev, { key: saved, clock: stateStr });
+    } else if (!cloud) {
+      pushCloudVault(dev, { key: "", clock: stateStr });
+    }
+
     if (saved) {
       const res = await verify(saved, dev);
       if (res.payload) {
@@ -259,13 +334,15 @@ const Sas4License = (() => {
       haptic([35, 45, 35]);
       return { ok: false, msg: chk.err === "device" ? "هذا المفتاح مخصّص لجهاز آخر" : "مفتاح الاشتراك غير صحيح" };
     }
-    const { now } = await monotonicClock(dev);
+    const { now, stateStr } = await monotonicClock(dev);
     const left = daysBetween(now, chk.payload.e);
     if (left === null || left < 0) {
       haptic([35, 45, 35]);
       return { ok: false, msg: "انتهت صلاحية هذا المفتاح" };
     }
-    await LicVault.set(licKey, raw.replace(/\s+/g, ""));
+    const cleanKey = raw.replace(/\s+/g, "");
+    await LicVault.set(licKey, cleanKey);
+    await pushCloudVault(dev, { key: cleanKey, clock: stateStr });
     haptic([20, 40, 30]);
     return { ok: true, msg: `تم التفعيل بنجاح. ينتهي الاشتراك في ${chk.payload.e}` };
   }
@@ -280,7 +357,7 @@ async function openSettingsModal() {
   currentLicStatus = st;
   document.getElementById("setLicSummary").textContent = st.summary;
   document.getElementById("setLoginUrl").value = gs("sas4_login_url", "https://reseller.nbtel.iq/api.php?action=login");
-  document.getElementById("setProxyUrl").value = gs("sas4_proxy", "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev");
+  document.getElementById("setProxyUrl").value = gs("sas4_proxy", DEFAULT_LIC_WORKER);
   document.getElementById("setUser").value = gs("sas4_user");
   document.getElementById("setPass").value = gs("sas4_pass");
   document.getElementById("setMsg").style.display = "none";
@@ -389,4 +466,4 @@ function initLicenseGate() {
 
 window.addEventListener("DOMContentLoaded", initLicenseGate);
 if (document.readyState !== "loading") initLicenseGate();
-        
+                                    
