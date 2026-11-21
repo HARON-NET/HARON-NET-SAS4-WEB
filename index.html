@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="haron_sas4_pwa_icon_1024.png">
 <title>HARON NET SAS4</title>
 <style>
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:#0B0F17;color:#F8FAFC;padding:15px 13px 30px}
 .wrap{max-width:500px;margin:0 auto}
 .card{background:#131926;border:1px solid #253047;border-radius:15px;padding:15px;margin-bottom:10px}
@@ -18,11 +18,13 @@ body{margin:0;background:#0B0F17;color:#F8FAFC;padding:15px 13px 30px}
 h1{margin:0 0 4px;font-size:19px}
 .sub{margin:0 0 13px;font-size:12px;color:#94A3B8}
 label{display:block;font-size:12px;color:#CBD5E1;margin-bottom:4px}
-input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:10px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
-.btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
+input,select,textarea{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:10px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
+.btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:11px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .08s ease,opacity .15s}
+.btn:active,.pill:active,.dev-box:active{transform:scale(.96)}
 .btn:disabled{opacity:.5}
 .btn-sm{width:auto;padding:6px 10px;font-size:12px;border-radius:8px}
 .btn-green{background:#16A34A;color:#fff}
+.btn-wa{background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.4);color:#4ADE80}
 .btn-amber{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45);color:#FCD34D}
 .btn-ghost{background:#1A2234;border:1px solid #253047;color:#F8FAFC}
 .btn-red{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#FCA5A5}
@@ -33,7 +35,7 @@ input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radiu
 .stat small{display:block;color:#94A3B8;font-size:10.5px;margin-bottom:2px}
 .stat b{font-size:16px}
 .pills{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
-.pill{background:#131926;border:1px solid #253047;color:#94A3B8;padding:5px 11px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap}
+.pill{background:#131926;border:1px solid #253047;color:#94A3B8;padding:5px 11px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap;transition:transform .08s}
 .pill.on{background:rgba(14,165,233,.15);border-color:#0EA5E9;color:#38BDF8;font-weight:700}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;background:#64748B}
 .dot.on{background:#22C55E;box-shadow:0 0 7px #22C55E}
@@ -41,16 +43,20 @@ input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radiu
 .tag.act{background:rgba(34,197,94,.15);color:#4ADE80}
 .tag.exp{background:rgba(239,68,68,.15);color:#F87171}
 .meta{font-size:12px;color:#94A3B8;line-height:1.65;margin-top:5px}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:13px;z-index:50;overflow-y:auto}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:13px;z-index:50;overflow-y:auto}
 .box{background:#0B0F17;border:1px solid #1E293B;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12.5px;line-height:1.65}
 .sep{border-top:1px solid #253047;margin:11px 0;padding-top:11px}
+.dev-box{background:#0B0F17;border:1px solid #253047;border-radius:12px;padding:13px;text-align:center;font-family:monospace;font-size:19px;font-weight:800;letter-spacing:2px;color:#38BDF8;margin:8px 0 12px;cursor:pointer;transition:transform .08s}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div id="loginView" style="min-height:85vh;display:flex;align-items:center">
     <div class="card" style="width:100%">
-      <div class="badge">HARON NET • بوابة الوكلاء</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="badge">HARON NET • بوابة الوكلاء</div>
+        <button type="button" class="btn btn-sm btn-ghost" onclick="openSettingsModal()">الضبط والاشتراك</button>
+      </div>
       <h1>HARON NET SAS4</h1>
       <p class="sub">إدارة المشتركين وتفعيل الاشتراكات</p>
       <label>اسم المستخدم (الوكيل)</label>
@@ -78,6 +84,7 @@ input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radiu
         <button type="button" class="btn btn-sm btn-ghost" onclick="toggleLive(this)">مباشر: متوقف</button>
         <button type="button" class="btn btn-sm btn-ghost" onclick="openHistory()">السجل</button>
         <button type="button" class="btn btn-sm btn-ghost" onclick="refreshAll()">تحديث</button>
+        <button type="button" class="btn btn-sm btn-ghost" onclick="openSettingsModal()">الضبط</button>
         <button type="button" class="btn btn-sm btn-red" onclick="logout()">خروج</button>
       </div>
     </div>
@@ -104,6 +111,7 @@ input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radiu
   </div>
 </div>
 
+<!-- نافذة التفاصيل / السجل -->
 <div id="detailModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -114,6 +122,7 @@ input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radiu
   </div>
 </div>
 
+<!-- نافذة تجديد الاشتراك -->
 <div id="renewModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -124,6 +133,52 @@ input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radiu
   </div>
 </div>
 
-<script src="app.js?v=11"></script>
+<!-- نافذة الضبط -->
+<div id="settingsModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
+  <div class="card" style="width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <b>الإعدادات</b>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('settingsModal').style.display='none'">إغلاق</button>
+    </div>
+    <div class="box">
+      <b style="font-size:14px">الاشتراك</b>
+      <div id="setLicSummary" class="meta" style="margin:5px 0 10px">جاري التحقق...</div>
+      <button type="button" class="btn btn-ghost" style="color:#38BDF8" onclick="openLicenseModal(true)">إدارة الاشتراك وإدخال مفتاح</button>
+    </div>
+    <div class="box" style="margin-bottom:0">
+      <b style="font-size:14px;display:block;margin-bottom:8px">ضبط الاتصال وبيانات الدخول المحفوظة</b>
+      <label>رابط بوابة المصادقة</label>
+      <input id="setLoginUrl" type="url" dir="ltr">
+      <label>رابط الوسيط (Cloudflare Worker)</label>
+      <input id="setProxyUrl" type="url" dir="ltr">
+      <label>اسم المستخدم</label>
+      <input id="setUser" type="text" dir="ltr">
+      <label>كلمة المرور</label>
+      <input id="setPass" type="password" dir="ltr">
+      <div id="setMsg" class="status" style="display:none;color:#FBBF24;margin-bottom:9px"></div>
+      <button type="button" class="btn" onclick="saveSettingsAndConnect()">حفظ بيانات الدخول وتسجيل الاتصال</button>
+      <button type="button" class="btn btn-ghost" style="color:#FCA5A5;margin-top:8px" onclick="clearSavedSettings()">مسح بيانات الدخول المحفوظة</button>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة الاشتراك والتفعيل -->
+<div id="licenseModal" class="modal-bg" style="z-index:70" onclick="if(event.target===this&&licAllowClose)this.style.display='none'">
+  <div class="card" style="width:100%;max-width:420px;max-height:92vh;overflow-y:auto">
+    <b style="font-size:17px;display:block;margin-bottom:6px">الاشتراك</b>
+    <div id="licSummary" class="meta" style="margin-bottom:10px"></div>
+    <div style="font-size:12px;color:#94A3B8">رمز هذا الجهاز (اضغط للنسخ):</div>
+    <div id="licDevCode" class="dev-box" dir="ltr" onclick="copyDevCode()">-----</div>
+    <textarea id="licKeyInput" rows="4" dir="ltr" placeholder="الصق مفتاح الاشتراك هنا" style="font-family:monospace;font-size:12px"></textarea>
+    <div id="licFeedback" class="status" style="display:none;margin-bottom:10px"></div>
+    <button type="button" class="btn btn-ghost" style="margin-bottom:8px" onclick="submitLicenseKey()">تفعيل</button>
+    <button type="button" class="btn btn-wa" style="margin-bottom:8px" onclick="requestKeyWhatsApp()">طلب المفتاح عبر واتساب</button>
+    <button id="licCloseBtn" type="button" class="btn btn-ghost" onclick="document.getElementById('licenseModal').style.display='none'">إغلاق</button>
+  </div>
+</div>
+
+<script src="app.js?v=18"></script>
+<script src="license.js?v=18"></script>
 </body>
-</html>
+          </html>
+                                            
