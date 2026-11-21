@@ -1,16 +1,18 @@
 {
   "name": "HARON NET SAS4",
   "short_name": "HARON SAS4",
-  "start_url": "/HARON-NET-SAS4-WEB/",
-  "scope": "/HARON-NET-SAS4-WEB/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0F1218",
-  "theme_color": "#0F1218",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
+  "background_color": "#080C12",
+  "theme_color": "#080C12",
+  "dir": "rtl",
+  "lang": "ar",
   "icons": [
     {
       "src": "haron_sas4_pwa_icon_1024.png",
-      "sizes": "512x512",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
     }
