@@ -257,4 +257,47 @@ async function doAct(uid,pr){
   const u=Number(document.getElementById("actUnits").value||1);if(!confirm("تأكيد تفعيل الاشتراك ("+u+" وحدة)؟"))return;
   const b=document.getElementById("bAct");b.disabled=true;rMsg("جاري التفعيل...",true);
   const r=await sasReq("POST","user/activate",{method:"credit",pin:"",user_id:String(uid),money_collected:1,comments:null,user_price:pr,issue_invoice:0,transaction_id:uuid(),activation_units:u});
-  b.disabled=false;if(r.ok&&r.json&&Number(r.json.status)===200){rMsg("تم تفعيل اشتراك المشترك بنجاح",true);refreshAll()}else rMsg(trMsg(r.json&&
+  b.disabled=false;if(r.ok&&r.json&&Number(r.json.status)===200){rMsg("تم تفعيل اشتراك المشترك بنجاح",true);refreshAll()}else rMsg(trMsg(r.json&&r.json.message),false);
+}
+
+async function doExt(uid,eid){
+  if(!confirm("تأكيد التمديد بالنقاط؟"))return;
+  const b=document.getElementById("bExt");b.disabled=true;rMsg("جاري التمديد...",true);
+  const r=await sasReq("POST","user/extend",{user_id:String(uid),profile_id:String(eid),method:"reward_points",transaction_id:uuid()});
+  b.disabled=false;if(r.ok&&r.json&&Number(r.json.status)===200){rMsg("تم تمديد الاشتراك بنجاح",true);refreshAll()}else rMsg(trMsg(r.json&&r.json.message),false);
+}
+
+async function doProf(uid){
+  const pid=Number(document.getElementById("pSel").value);if(!pid)return;
+  const b=document.getElementById("bProf");b.disabled=true;rMsg("جاري تغيير الباقة...",true);
+  const r=await sasReq("POST","user/changeProfile",{user_id:String(uid),profile_id:pid,change_type:"immediate"});
+  b.disabled=false;if(r.ok&&r.json&&Number(r.json.status)===200){rMsg("تم تغيير الباقة فوراً",true);refreshAll()}else rMsg(trMsg(r.json&&r.json.message),false);
+}
+
+async function openHistory(){
+  document.getElementById("modalTitle").textContent="سجل التفعيلات";const b=document.getElementById("modalBody");b.textContent="جاري التحميل...";document.getElementById("detailModal").style.display="flex";
+  const r=await sasReq("POST","index/activations",{page:1,count:30,sortBy:"id",direction:"desc",search:"",columns:["created_at","username","firstname","lastname","username","name","price","user_price","old_expiration","new_expiration","activation_method","user_activations_count","refunded"]});
+  if(r.ok&&r.json&&Array.isArray(r.json.data)&&r.json.data.length)b.innerHTML=r.json.data.map(o=>`<div class="box"><b dir="ltr" style="color:#38BDF8">@${(o.user_details&&o.user_details.username)||'—'}</b> • <b>${(o.profile_details&&o.profile_details.name)||'—'}</b><br>السعر: <b>${o.price||'0'}</b> • الانتهاء: <span dir="ltr">${o.new_expiration||'—'}</span><br><small style="color:#64748B" dir="ltr">${o.created_at||''}</small></div>`).join("");
+  else b.textContent="لا توجد تفعيلات حديثة.";
+}
+
+async function openDetails(uid){
+  const s=allSubs.find(x=>x.id===uid);document.getElementById("modalTitle").textContent="المشترك: "+(s?s.username:uid);
+  const b=document.getElementById("modalBody");b.textContent="جاري التحميل...";document.getElementById("detailModal").style.display="flex";
+  const r=await sasReq("GET","user/overview/"+uid);
+  if(r.ok&&r.json&&r.json.data){const d=r.json.data;b.innerHTML=`كلمة المرور: <b dir="ltr">${d.password||'—'}</b><br>الهاتف: <b dir="ltr">${d.phone||'—'}</b><br>العنوان: <b>${d.address||'—'}</b><br>آخر اتصال: <span dir="ltr">${d.last_online||'—'}</span>`}else b.textContent="تعذر جلب التفاصيل.";
+}
+
+async function disconnectSub(rad){if(!confirm("فصل اتصال المشترك؟"))return;await sasReq("GET","user/disconnect/acctid/"+rad);loadSubs()}
+function logout(){localStorage.removeItem("sas4_token");document.getElementById("appView").style.display="none";document.getElementById("loginView").style.display="flex"}
+
+window.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("username").value=gs("sas4_user");document.getElementById("password").value=gs("sas4_pass");
+  if(gs("sas4_proxy"))document.getElementById("proxyUrl").value=gs("sas4_proxy");
+  if(gs("sas4_login_url"))document.getElementById("loginUrl").value=gs("sas4_login_url");
+  if(gs("sas4_token")){document.getElementById("loginView").style.display="none";document.getElementById("appView").style.display="block";document.getElementById("agentLabel").textContent="الوكيل: "+gs("sas4_user");refreshAll()}
+});
+</script>
+</body>
+</html>
+
