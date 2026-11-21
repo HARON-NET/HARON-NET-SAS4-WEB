@@ -3,17 +3,22 @@ const LIC_VENDOR_WA = "9647750149398";
 const LIC_TRIAL_DAYS = 7;
 const LIC_DAY_MS = 86400000;
 
-function haptic(pattern = 22) {
+let _lastHaptic = 0;
+function haptic(pattern = 25) {
+  const now = Date.now();
+  if (now - _lastHaptic < 70) return;
+  _lastHaptic = now;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
-  try {
-    const lbl = document.getElementById("iosHapticLbl");
-    if (lbl) lbl.click();
-  } catch (e) {}
 }
 
-document.addEventListener("click", (e) => {
-  if (e.target.closest("button, .pill, a[href], summary, .dev-box")) haptic(20);
-}, true);
+["touchend", "click"].forEach(evt => {
+  document.addEventListener(evt, (e) => {
+    if (e.target.closest("button, .stat-card, .sort-pill, .debt-banner, .sub-card, .icon-btn, .search-btn, .live-pill, .dev-box, summary, a")) {
+      haptic(24);
+    }
+  }, { capture: true, passive: true });
+});
+
 
 const Sas4License = (() => {
   const appTag = "sas4";
