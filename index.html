@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="HARON SAS4">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="haron_sas4_pwa_icon_1024.png">
-  <title>HARON NET SAS4</title>
-  <style>
-    *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{margin:0;background:#0B0F17;color:#F8FAFC;padding:16px 14px 32px}
-    .wrap{max-width:500px;margin:0 auto}
-    .card{background:#131926;border:1px solid #253047;border-radius:16px;padding:16px;margin-bottom:11px}
-    .badge{display:inline-block;background:rgba(14,165,233,.15);color:#38BDF8;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:8px}
-    h1{margin:0 0 4px;font-size:20px}
-    .sub{margin:0 0 14px;font-size:12.5px;color:#94A3B8}
-    label{display:block;font-size:12px;color:#CBD5E1;margin-bottom:4px}
-    input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:10px 11px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
-    input:focus,select:focus{border-color:#0EA5E9}
-    .btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:11px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
-    .btn:disabled{opacity:.5}
-    .btn-sm{width:auto;padding:6px 11px;font-size:12px;border-radius:8px}
-    .btn-green{background:#16A34A;color:#fff}
-    .btn-amber{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45);color:#FCD34D}
-    .btn-ghost{background:#1A2234;border:1px solid #253047;color:#F8FAFC}
-    .btn-red{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#FCA5A5}
-    .status{margin-top:10px;font-size:12px;padding:9px 11px;border-radius:9px;background:#0B0F17;border:1px solid #1E293B;color:#94A3B8;word-break:break-word}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
-    .stat{background:#131926;border:1px solid #253047;border-radius:12px;padding:11px}
-    .stat small{display:block;color:#94A3B8;font-size:11px;margin-bottom:3px}
-    .stat b{font-size:17px}
-    .pills{display:flex;gap:6px;margin-bottom:11px;overflow-x:auto}
-    .pill{background:#131926;border:1px solid #253047;color:#94A3B8;padding:5px 11px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap}
-    .pill.on{background:rgba(14,165,233,.15);border-color:#0EA5E9;color:#38BDF8;font-weight:700}
-    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;background:#64748B}
-    .dot.on{background:#22C55E;box-shadow:0 0 7px #22C55E}
-    .tag{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
-    .tag.act{background:rgba(34,197,94,.15);color:#4ADE80}
-    .tag.exp{background:rgba(239,68,68,.15);color:#F87171}
-    .meta{font-size:12px;color:#94A3B8;line-height:1.65;margin-top:5px}
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:14px;z-index:50;overflow-y:auto}
-    .box-info{background:#0B0F17;border:1px solid #1E293B;border-radius:11px;padding:11px;margin-bottom:11px;font-size:12.5px;line-height:1.7}
-    .sep{border-top:1px solid #253047;margin:12px 0;padding-top:12px}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HARON SAS4">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="haron_sas4_pwa_icon_1024.png">
+<title>HARON NET SAS4</title>
+<style>
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{margin:0;background:#0B0F17;color:#F8FAFC;padding:15px 13px 30px}
+.wrap{max-width:500px;margin:0 auto}
+.card{background:#131926;border:1px solid #253047;border-radius:15px;padding:15px;margin-bottom:10px}
+.badge{display:inline-block;background:rgba(14,165,233,.15);color:#38BDF8;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-bottom:7px}
+h1{margin:0 0 4px;font-size:19px}
+.sub{margin:0 0 13px;font-size:12px;color:#94A3B8}
+label{display:block;font-size:12px;color:#CBD5E1;margin-bottom:4px}
+input,select{width:100%;background:#0B0F17;border:1px solid #253047;border-radius:10px;padding:10px;color:#F8FAFC;font-size:13.5px;margin-bottom:10px;outline:none}
+.btn{width:100%;background:#0EA5E9;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.5}
+.btn-sm{width:auto;padding:6px 10px;font-size:12px;border-radius:8px}
+.btn-green{background:#16A34A;color:#fff}
+.btn-amber{background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45);color:#FCD34D}
+.btn-ghost{background:#1A2234;border:1px solid #253047;color:#F8FAFC}
+.btn-red{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#FCA5A5}
+.status{margin-top:10px;font-size:12px;padding:8px 10px;border-radius:9px;background:#0B0F17;border:1px solid #1E293B;color:#94A3B8;word-break:break-word}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
+.stat{background:#131926;border:1px solid #253047;border-radius:12px;padding:10px}
+.stat small{display:block;color:#94A3B8;font-size:11px;margin-bottom:2px}
+.stat b{font-size:17px}
+.pills{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
+.pill{background:#131926;border:1px solid #253047;color:#94A3B8;padding:5px 11px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap}
+.pill.on{background:rgba(14,165,233,.15);border-color:#0EA5E9;color:#38BDF8;font-weight:700}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;background:#64748B}
+.dot.on{background:#22C55E;box-shadow:0 0 7px #22C55E}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
+.tag.act{background:rgba(34,197,94,.15);color:#4ADE80}
+.tag.exp{background:rgba(239,68,68,.15);color:#F87171}
+.meta{font-size:12px;color:#94A3B8;line-height:1.65;margin-top:5px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:13px;z-index:50;overflow-y:auto}
+.box{background:#0B0F17;border:1px solid #1E293B;border-radius:10px;padding:10px;margin-bottom:10px;font-size:12.5px;line-height:1.65}
+.sep{border-top:1px solid #253047;margin:11px 0;padding-top:11px}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <div id="loginView" style="min-height:85vh;display:flex;align-items:center;">
+  <div id="loginView" style="min-height:85vh;display:flex;align-items:center">
     <div class="card" style="width:100%">
       <div class="badge">HARON NET • بوابة الوكلاء</div>
       <h1>HARON NET SAS4</h1>
@@ -57,9 +56,9 @@
       <input id="username" type="text" dir="ltr" placeholder="admin@haron">
       <label>كلمة المرور</label>
       <input id="password" type="password" dir="ltr" placeholder="••••••••">
-      <details style="margin-bottom:12px;font-size:12px;color:#94A3B8">
+      <details style="margin-bottom:11px;font-size:12px;color:#94A3B8">
         <summary style="cursor:pointer">إعدادات السيرفر والوسيط</summary>
-        <div style="margin-top:9px">
+        <div style="margin-top:8px">
           <label>رابط الوسيط (Cloudflare Worker)</label>
           <input id="proxyUrl" type="url" dir="ltr" value="https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev">
           <label>رابط بوابة SAS4</label>
@@ -72,9 +71,9 @@
   </div>
 
   <div id="appView" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;gap:6px">
       <div><b>HARON NET SAS4</b><div id="agentLabel" style="font-size:11.5px;color:#94A3B8"></div></div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <div style="display:flex;gap:5px">
         <button type="button" class="btn btn-sm btn-ghost" onclick="openHistory()">السجل</button>
         <button type="button" class="btn btn-sm btn-ghost" onclick="refreshAll()">تحديث</button>
         <button type="button" class="btn btn-sm btn-red" onclick="logout()">خروج</button>
@@ -97,255 +96,165 @@
   </div>
 </div>
 
-<!-- نافذة التفاصيل / السجل -->
 <div id="detailModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <b id="modalTitle">تفاصيل المشترك</b>
+      <b id="modalTitle">التفاصيل</b>
       <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('detailModal').style.display='none'">إغلاق</button>
     </div>
     <div id="modalBody" class="meta">جاري التحميل...</div>
   </div>
 </div>
 
-<!-- نافذة تجديد وتفعيل الاشتراك -->
 <div id="renewModal" class="modal-bg" onclick="if(event.target===this)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:90vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <b id="renewTitle">تجديد وتفعيل الاشتراك</b>
+      <b id="renewTitle">تجديد الاشتراك</b>
       <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('renewModal').style.display='none'">إغلاق</button>
     </div>
-    <div id="renewContent" class="meta">جاري جلب بيانات الباقة والرصيد...</div>
+    <div id="renewContent" class="meta">جاري التحميل...</div>
   </div>
 </div>
 
 <script>
-const SAS4_KEY = "abcdefghijuklmno0123456789012345";
-let allSubs = [], currentFilter = "all", profilesCache = [];
+window.onerror=function(m){var b=document.getElementById("statusBox");if(b){b.style.color="#FCA5A5";b.textContent="خطأ: "+m;}};
+const SAS4_KEY="abcdefghijuklmno0123456789012345";
+let allSubs=[],currentFilter="all",profilesCache=[];
+const gs=(k,d="")=>localStorage.getItem(k)||d,ss=(k,v)=>localStorage.setItem(k,v);
+const uuid=()=>crypto.randomUUID?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>(c==="x"?Math.random()*16|0:(Math.random()*16|0)&3|8).toString(16));
+const trMsg=c=>c==="rsp_insufficient_balance"?"الرصيد أو النقاط غير كافية":c==="rsp_profile_changed"?"تم تغيير الباقة بنجاح":c==="rsp_success"?"تمت العملية بنجاح":(c||"فشل تنفيذ العملية");
 
-function genUUID() {
-  if (crypto.randomUUID) return crypto.randomUUID();
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
-  });
-}
-
-function trMsg(code) {
-  if (code === "rsp_insufficient_balance") return "الرصيد أو النقاط غير كافية لإتمام العملية";
-  if (code === "rsp_profile_changed") return "تم تغيير الباقة بنجاح";
-  if (code === "rsp_success") return "تمت العملية بنجاح";
-  return code || "فشل تنفيذ العملية على الخادم";
-}
-
-function md5Bytes(bytes) {
-  const s = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
-  const K = new Uint32Array(64);
-  for (let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 0x100000000) >>> 0;
-  const origLen = bytes.length, bitLen = origLen * 8;
-  let padLen = origLen + 1;
-  while (padLen % 64 !== 56) padLen++;
-  const buf = new Uint8Array(padLen + 8);
-  buf.set(bytes); buf[origLen] = 0x80;
-  const dv = new DataView(buf.buffer);
-  dv.setUint32(padLen, bitLen >>> 0, true);
-  dv.setUint32(padLen + 4, Math.floor(bitLen / 0x100000000) >>> 0, true);
-  let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
-  const M = new Uint32Array(16);
-  for (let off = 0; off < buf.length; off += 64) {
-    for (let j = 0; j < 16; j++) M[j] = dv.getUint32(off + j * 4, true);
-    let A = a0, B = b0, C = c0, D = d0;
-    for (let i = 0; i < 64; i++) {
-      let F, g;
-      if (i < 16) { F = (B & C) | (~B & D); g = i; }
-      else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
-      else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) % 16; }
-      else { F = C ^ (B | ~D); g = (7 * i) % 16; }
-      F = (F + A + K[i] + M[g]) >>> 0;
-      A = D; D = C; C = B;
-      B = (B + ((F << s[i]) | (F >>> (32 - s[i])))) >>> 0;
+function md5(b){
+  const s=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21],K=new Uint32Array(64);
+  for(let i=0;i<64;i++)K[i]=Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0;
+  let l=b.length,p=l+1;while(p%64!==56)p++;
+  const u=new Uint8Array(p+8);u.set(b);u[l]=128;
+  const d=new DataView(u.buffer);d.setUint32(p,(l*8)>>>0,true);d.setUint32(p+4,Math.floor(l*8/4294967296)>>>0,true);
+  let a=0x67452301,e=0xefcdab89,c=0x98badcfe,g=0x10325476,M=new Uint32Array(16);
+  for(let o=0;o<u.length;o+=64){
+    for(let j=0;j<16;j++)M[j]=d.getUint32(o+j*4,true);
+    let A=a,B=e,C=c,D=g;
+    for(let i=0;i<64;i++){
+      let F,k;if(i<16){F=(B&C)|(~B&D);k=i}else if(i<32){F=(D&B)|(~D&C);k=(5*i+1)%16}else if(i<48){F=B^C^D;k=(3*i+5)%16}else{F=C^(B|~D);k=(7*i)%16}
+      F=(F+A+K[i]+M[k])>>>0;A=D;D=C;C=B;B=(B+((F<<s[i])|(F>>>(32-s[i]))))>>>0;
     }
-    a0 = (a0 + A) >>> 0; b0 = (b0 + B) >>> 0; c0 = (c0 + C) >>> 0; d0 = (d0 + D) >>> 0;
+    a=(a+A)>>>0;e=(e+B)>>>0;c=(c+C)>>>0;g=(g+D)>>>0;
   }
-  const out = new Uint8Array(16), odv = new DataView(out.buffer);
-  odv.setUint32(0, a0, true); odv.setUint32(4, b0, true); odv.setUint32(8, c0, true); odv.setUint32(12, d0, true);
-  return out;
+  const out=new Uint8Array(16),v=new DataView(out.buffer);v.setUint32(0,a,true);v.setUint32(4,e,true);v.setUint32(8,c,true);v.setUint32(12,g,true);return out;
 }
 
-async function encryptSas4(obj) {
-  const enc = new TextEncoder();
-  const pass = enc.encode(SAS4_KEY), plain = enc.encode(JSON.stringify(obj));
-  const salt = crypto.getRandomValues(new Uint8Array(8));
-  const ki = new Uint8Array(48);
-  let prev = new Uint8Array(0), off = 0;
-  while (off < 48) {
-    const inp = new Uint8Array(prev.length + pass.length + salt.length);
-    inp.set(prev, 0); inp.set(pass, prev.length); inp.set(salt, prev.length + pass.length);
-    prev = md5Bytes(inp);
-    const take = Math.min(prev.length, 48 - off);
-    ki.set(prev.subarray(0, take), off); off += take;
-  }
-  const key = await crypto.subtle.importKey("raw", ki.subarray(0, 32), { name: "AES-CBC" }, false, ["encrypt"]);
-  const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-CBC", iv: ki.subarray(32, 48) }, key, plain));
-  const pref = enc.encode("Salted__");
-  const full = new Uint8Array(pref.length + salt.length + cipher.length);
-  full.set(pref, 0); full.set(salt, pref.length); full.set(cipher, pref.length + salt.length);
-  let bin = "";
-  for (let i = 0; i < full.length; i++) bin += String.fromCharCode(full[i]);
-  return btoa(bin);
+async function encSas(obj){
+  const te=new TextEncoder(),pass=te.encode(SAS4_KEY),plain=te.encode(JSON.stringify(obj)),salt=crypto.getRandomValues(new Uint8Array(8)),ki=new Uint8Array(48);
+  let prev=new Uint8Array(0),off=0;
+  while(off<48){const inp=new Uint8Array(prev.length+pass.length+8);inp.set(prev);inp.set(pass,prev.length);inp.set(salt,prev.length+pass.length);prev=md5(inp);const t=Math.min(prev.length,48-off);ki.set(prev.subarray(0,t),off);off+=t}
+  const key=await crypto.subtle.importKey("raw",ki.subarray(0,32),{name:"AES-CBC"},false,["encrypt"]);
+  const cip=new Uint8Array(await crypto.subtle.encrypt({name:"AES-CBC",iv:ki.subarray(32,48)},key,plain)),pref=te.encode("Salted__"),full=new Uint8Array(16+cip.length);
+  full.set(pref);full.set(salt,8);full.set(cip,16);
+  let s="";for(let i=0;i<full.length;i++)s+=String.fromCharCode(full[i]);return btoa(s);
 }
 
-const gs = (k, d = "") => localStorage.getItem(k) || d;
-const ss = (k, v) => localStorage.setItem(k, v);
-function setStatus(m, c) { const b = document.getElementById("statusBox"); b.style.color = c || "#94A3B8"; b.textContent = m; }
+function setStatus(m,c){const b=document.getElementById("statusBox");b.style.color=c||"#94A3B8";b.textContent=m}
 
-async function apiCall(method, targetUrl, plainObj = null, auth = true) {
-  const proxy = gs("sas4_proxy", "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev").replace(/\/+$/, "");
-  const headers = { "Accept": "application/json, text/plain, */*", "X-Target-Url": targetUrl };
-  if (auth && gs("sas4_token")) headers["Authorization"] = "Bearer " + gs("sas4_token");
+async function apiCall(method,target,obj=null,auth=true){
+  const proxy=gs("sas4_proxy","https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev").trim().replace(/\/+$/,"");
+  const h={"Accept":"application/json, text/plain, */*","X-Target-Url":target.trim()};
+  if(auth&&gs("sas4_token"))h["Authorization"]="Bearer "+gs("sas4_token");
   let body;
-  if (method === "POST" || method === "PUT") {
-    headers["Content-Type"] = "application/json; charset=utf-8";
-    body = plainObj ? JSON.stringify({ payload: await encryptSas4(plainObj) }) : "{}";
-  }
-  const res = await fetch(proxy + "/proxy", { method, headers, body });
-  const text = await res.text();
-  let json = null;
-  try { json = JSON.parse(text); } catch (e) {}
-  return { ok: res.ok, status: res.status, text, json };
+  if(method==="POST"||method==="PUT"){h["Content-Type"]="application/json; charset=utf-8";body=obj?JSON.stringify({payload:await encSas(obj)}):"{}"}
+  const res=await fetch(proxy+"/proxy",{method,headers:h,body}),text=await res.text();
+  let json=null;try{json=JSON.parse(text)}catch(e){}
+  return{ok:res.ok,status:res.status,text,json};
 }
 
-async function doLogin(silent = false) {
-  const user = document.getElementById("username").value.trim() || gs("sas4_user");
-  const pass = document.getElementById("password").value || gs("sas4_pass");
-  const proxy = document.getElementById("proxyUrl").value.trim().replace(/\/+$/, "");
-  const loginUrl = document.getElementById("loginUrl").value.trim();
-  if (!user || !pass) { if (!silent) setStatus("أدخل اسم المستخدم وكلمة المرور.", "#FBBF24"); return false; }
-  ss("sas4_user", user); ss("sas4_pass", pass); ss("sas4_proxy", proxy); ss("sas4_login_url", loginUrl);
-  const btn = document.getElementById("loginBtn");
-  btn.disabled = true;
-  if (!silent) setStatus("جاري التشفير والاتصال ببوابة SAS4...", "#38BDF8");
-  try {
-    const r = await apiCall("POST", loginUrl, { username: user, password: pass, language: "ar" }, false);
-    btn.disabled = false;
-    if (r.ok && r.json && Number(r.json.status) === 200 && r.json.token) {
-      ss("sas4_token", r.json.token);
-      const base = (r.json.successful_server && r.json.successful_server.api_url) ? r.json.successful_server.api_url.replace(/\/+$/, "") : "https://s3.nbtel.iq/admin/api/index.php/api";
-      ss("sas4_api_base", base);
-      if (!silent) {
-        document.getElementById("loginView").style.display = "none";
-        document.getElementById("appView").style.display = "block";
-        document.getElementById("agentLabel").textContent = "الوكيل: " + user;
-        refreshAll();
-      }
+async function doLogin(silent=false){
+  const user=(document.getElementById("username").value||gs("sas4_user")).trim();
+  const pass=document.getElementById("password").value||gs("sas4_pass");
+  const proxy=document.getElementById("proxyUrl").value.trim().replace(/\/+$/,"");
+  const lurl=document.getElementById("loginUrl").value.trim();
+  if(!user||!pass){if(!silent)setStatus("أدخل اسم المستخدم وكلمة المرور.","#FBBF24");return false}
+  ss("sas4_user",user);ss("sas4_pass",pass);ss("sas4_proxy",proxy);ss("sas4_login_url",lurl);
+  const btn=document.getElementById("loginBtn");btn.disabled=true;
+  if(!silent)setStatus("جاري الاتصال ببوابة SAS4...","#38BDF8");
+  try{
+    const r=await apiCall("POST",lurl,{username:user,password:pass,language:"ar"},false);btn.disabled=false;
+    if(r.ok&&r.json&&Number(r.json.status)===200&&r.json.token){
+      ss("sas4_token",r.json.token);
+      const base=(r.json.successful_server&&r.json.successful_server.api_url)?r.json.successful_server.api_url.replace(/\/+$/,""):"https://s3.nbtel.iq/admin/api/index.php/api";
+      ss("sas4_api_base",base);
+      if(!silent){document.getElementById("loginView").style.display="none";document.getElementById("appView").style.display="block";document.getElementById("agentLabel").textContent="الوكيل: "+user;refreshAll()}
       return true;
     }
-    const err = (r.json && (r.json.message || r.json.error)) || r.text.slice(0, 140) || ("HTTP " + r.status);
-    if (!silent) setStatus("فشل الدخول (" + r.status + "): " + err, "#FCA5A5");
-    return false;
-  } catch (e) {
-    btn.disabled = false;
-    if (!silent) setStatus("تعذر الاتصال: " + e.message, "#FCA5A5");
-    return false;
-  }
+    const err=(r.json&&(r.json.message||r.json.error))||r.text.slice(0,120)||("HTTP "+r.status);
+    if(!silent)setStatus("فشل الدخول ("+r.status+"): "+err,"#FCA5A5");return false;
+  }catch(e){btn.disabled=false;if(!silent)setStatus("تعذر الاتصال: "+e.message,"#FCA5A5");return false}
 }
 
-async function sasReq(method, path, obj = null) {
-  const base = gs("sas4_api_base", "https://s3.nbtel.iq/admin/api/index.php/api");
-  const u = base + "/" + path.replace(/^\/+/, "");
-  let r = await apiCall(method, u, obj, true);
-  if (r.status === 401 && await doLogin(true)) r = await apiCall(method, u, obj, true);
-  return r;
+async function sasReq(m,p,o=null){
+  const u=gs("sas4_api_base","https://s3.nbtel.iq/admin/api/index.php/api")+"/"+p.replace(/^\/+/,"");
+  let r=await apiCall(m,u,o,true);if(r.status===401&&await doLogin(true))r=await apiCall(m,u,o,true);return r;
 }
 
-function refreshAll() { loadMetrics(); loadSubscribers(); }
+function refreshAll(){loadMetrics();loadSubs()}
 
-async function loadMetrics() {
-  const keys = ["wd_balance", "wd_users_online", "wd_users_active_count", "wd_users_expired_count"];
-  const res = await Promise.all(keys.map(k => sasReq("GET", "widgetData/internal/" + k)));
-  const ids = ["mBalance", "mOnline", "mActive", "mExpired"];
-  res.forEach((r, i) => { if (r.ok && r.json && r.json.data !== undefined) document.getElementById(ids[i]).textContent = r.json.data; });
+async function loadMetrics(){
+  const ks=["wd_balance","wd_users_online","wd_users_active_count","wd_users_expired_count"],ids=["mBalance","mOnline","mActive","mExpired"];
+  const rs=await Promise.all(ks.map(k=>sasReq("GET","widgetData/internal/"+k)));
+  rs.forEach((r,i)=>{if(r.ok&&r.json&&r.json.data!==undefined)document.getElementById(ids[i]).textContent=r.json.data});
 }
 
-async function loadSubscribers() {
-  const el = document.getElementById("subsList");
-  el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">جاري جلب المشتركين...</div>';
-  const [ru, ro] = await Promise.all([
-    sasReq("POST", "index/user", { page: 1, count: 500, columns: ["idx","username","firstname","lastname","expiration","parent_username","name","loan_balance","traffic","remaining_days"], connection: -1, profile_id: -1, parent_id: -1, sub_users: true, mac: "", direction: "asc", sortBy: "username", search: "" }),
-    sasReq("POST", "index/online", { page: 1, count: 500, sortBy: null, direction: "asc", search: "", columns: ["id","username","framedipaddress","callingstationid","acctsessiontime","acctinputoctets","acctoutputoctets"] })
+async function loadSubs(){
+  const el=document.getElementById("subsList");el.innerHTML='<div class="card" style="text-align:center;color:#94A3B8">جاري جلب المشتركين...</div>';
+  const [ru,ro]=await Promise.all([
+    sasReq("POST","index/user",{page:1,count:500,columns:["idx","username","firstname","lastname","expiration","parent_username","name","loan_balance","traffic","remaining_days"],connection:-1,profile_id:-1,parent_id:-1,sub_users:true,mac:"",direction:"asc",sortBy:"username",search:""}),
+    sasReq("POST","index/online",{page:1,count:500,sortBy:null,direction:"asc",search:"",columns:["id","username","framedipaddress","callingstationid","acctsessiontime","acctinputoctets","acctoutputoctets"]})
   ]);
-  const omap = {};
-  if (ro.ok && ro.json && Array.isArray(ro.json.data)) {
-    ro.json.data.forEach(x => { const uid = x.user_details && Number(x.user_details.id); if (uid > 0) omap[uid] = { rad: x.radacctid || x.id || 0, ip: x.framedipaddress || "" }; });
-  }
-  if (!ru.ok || !ru.json || !Array.isArray(ru.json.data)) {
-    el.innerHTML = '<div class="card" style="color:#FCA5A5">تعذر جلب المشتركين (' + ru.status + ')</div>'; return;
-  }
-  allSubs = ru.json.data.map(u => {
-    const uid = Number(u.id), fn = (u.firstname && u.firstname !== "فارغ") ? u.firstname : "", ln = u.lastname || "";
-    const live = omap[uid];
-    return {
-      id: uid, username: u.username || "", fullName: (fn + " " + ln).trim() || u.username,
-      profileId: Number(u.profile_id || 0),
-      profile: (u.profile_details && u.profile_details.name) || u.profile_name || "—",
-      expiration: u.expiration || "—", days: Number(u.remaining_days || 0),
-      isOnline: Number(u.online_status) === 1 || !!live, isActive: !!(u.status && u.status.status),
-      rad: live ? live.rad : 0, ip: live ? live.ip : ""
-    };
+  const om={};if(ro.ok&&ro.json&&Array.isArray(ro.json.data))ro.json.data.forEach(x=>{const id=x.user_details&&Number(x.user_details.id);if(id>0)om[id]={rad:x.radacctid||x.id||0,ip:x.framedipaddress||""}});
+  if(!ru.ok||!ru.json||!Array.isArray(ru.json.data)){el.innerHTML='<div class="card" style="color:#FCA5A5">تعذر جلب المشتركين ('+ru.status+')</div>';return}
+  allSubs=ru.json.data.map(u=>{
+    const id=Number(u.id),fn=(u.firstname&&u.firstname!=="فارغ")?u.firstname:"",ln=u.lastname||"",lv=om[id];
+    return{id,username:u.username||"",fullName:(fn+" "+ln).trim()||u.username,profile:(u.profile_details&&u.profile_details.name)||u.profile_name||"—",expiration:u.expiration||"—",days:Number(u.remaining_days||0),isOnline:Number(u.online_status)===1||!!lv,isActive:!!(u.status&&u.status.status),rad:lv?lv.rad:0,ip:lv?lv.ip:""};
   });
-  allSubs.sort((a, b) => (b.isOnline - a.isOnline) || (b.isActive - a.isActive));
-  document.getElementById("cAll").textContent = allSubs.length;
-  document.getElementById("cOn").textContent = allSubs.filter(x => x.isOnline).length;
-  document.getElementById("cAct").textContent = allSubs.filter(x => x.isActive).length;
-  document.getElementById("cExp").textContent = allSubs.filter(x => !x.isActive).length;
+  allSubs.sort((a,b)=>(b.isOnline-a.isOnline)||(b.isActive-a.isActive));
+  document.getElementById("cAll").textContent=allSubs.length;
+  document.getElementById("cOn").textContent=allSubs.filter(x=>x.isOnline).length;
+  document.getElementById("cAct").textContent=allSubs.filter(x=>x.isActive).length;
+  document.getElementById("cExp").textContent=allSubs.filter(x=>!x.isActive).length;
   renderList();
 }
 
-function setFilter(f, el) { currentFilter = f; document.querySelectorAll(".pill").forEach(p => p.classList.remove("on")); el.classList.add("on"); renderList(); }
+function setFilter(f,el){currentFilter=f;document.querySelectorAll(".pill").forEach(p=>p.classList.remove("on"));el.classList.add("on");renderList()}
 
-function renderList() {
-  const q = document.getElementById("searchBox").value.trim().toLowerCase();
-  const list = allSubs.filter(s => {
-    if (currentFilter === "online" && !s.isOnline) return false;
-    if (currentFilter === "active" && !s.isActive) return false;
-    if (currentFilter === "expired" && s.isActive) return false;
-    return !q || s.username.toLowerCase().includes(q) || s.fullName.toLowerCase().includes(q) || s.profile.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q);
-  });
-  const el = document.getElementById("subsList");
-  if (!list.length) { el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">لا توجد نتائج</div>'; return; }
-  el.innerHTML = list.map(s => `<div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div><span class="dot ${s.isOnline?'on':''}"></span><b>${s.fullName}</b> <span style="font-size:12px;color:#38BDF8" dir="ltr">@${s.username}</span></div>
-      <span class="tag ${s.isActive?'act':'exp'}">${s.isActive?'نشط':'منتهي'}</span>
-    </div>
-    <div class="meta">الباقة: <b>${s.profile}</b> • المتبقي: <b>${s.days} يوم</b><br>الانتهاء: <span dir="ltr">${s.expiration}</span>${s.ip?' • IP: <span dir="ltr">'+s.ip+'</span>':''}</div>
-    <div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap">
-      <button type="button" class="btn btn-sm btn-green" onclick="openRenew(${s.id})">تجديد / تفعيل</button>
-      <button type="button" class="btn btn-sm btn-ghost" onclick="openDetails(${s.id},'${s.username}')">التفاصيل</button>
-      ${s.isOnline&&s.rad?`<button type="button" class="btn btn-sm btn-red" onclick="disconnectSub(${s.rad},'${s.username}')">فصل</button>`:''}
-    </div>
-  </div>`).join("");
+function renderList(){
+  const q=document.getElementById("searchBox").value.trim().toLowerCase();
+  const list=allSubs.filter(s=>(currentFilter!=="online"||s.isOnline)&&(currentFilter!=="active"||s.isActive)&&(currentFilter!=="expired"||!s.isActive)&&(!q||s.username.toLowerCase().includes(q)||s.fullName.toLowerCase().includes(q)||s.profile.toLowerCase().includes(q)||s.ip.toLowerCase().includes(q)));
+  const el=document.getElementById("subsList");
+  if(!list.length){el.innerHTML='<div class="card" style="text-align:center;color:#94A3B8">لا توجد نتائج</div>';return}
+  el.innerHTML=list.map(s=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><span class="dot ${s.isOnline?'on':''}"></span><b>${s.fullName}</b> <span style="font-size:12px;color:#38BDF8" dir="ltr">@${s.username}</span></div><span class="tag ${s.isActive?'act':'exp'}">${s.isActive?'نشط':'منتهي'}</span></div><div class="meta">الباقة: <b>${s.profile}</b> • المتبقي: <b>${s.days} يوم</b><br>الانتهاء: <span dir="ltr">${s.expiration}</span>${s.ip?' • IP: <span dir="ltr">'+s.ip+'</span>':''}</div><div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap"><button type="button" class="btn btn-sm btn-green" onclick="openRenew(${s.id})">تجديد / تفعيل</button><button type="button" class="btn btn-sm btn-ghost" onclick="openDetails(${s.id})">التفاصيل</button>${s.isOnline&&s.rad?`<button type="button" class="btn btn-sm btn-red" onclick="disconnectSub(${s.rad})">فصل</button>`:''}</div></div>`).join("");
 }
 
-async function openRenew(uid) {
-  const modal = document.getElementById("renewModal");
-  const box = document.getElementById("renewContent");
-  const sub = allSubs.find(x => x.id === uid);
-  document.getElementById("renewTitle").textContent = "تجديد: " + (sub ? sub.fullName : uid);
-  box.innerHTML = "جاري جلب بيانات الباقة والرصيد...";
-  modal.style.display = "flex";
+async function openRenew(uid){
+  const m=document.getElementById("renewModal"),box=document.getElementById("renewContent"),s=allSubs.find(x=>x.id===uid);
+  document.getElementById("renewTitle").textContent="تجديد: "+(s?s.fullName:uid);box.innerHTML="جاري جلب بيانات الباقة...";m.style.display="flex";
+  const [ra,re,rl,rp]=await Promise.all([sasReq("GET","user/activationData/"+uid),sasReq("GET","user/extensionData/"+uid),sasReq("GET","allowedExtensions/3"),profilesCache.length?Promise.resolve({ok:true,json:{data:profilesCache}}):sasReq("GET","list/profile/0")]);
+  if(!ra.ok||!ra.json||!ra.json.data){box.innerHTML='<div style="color:#FCA5A5">فشل جلب بيانات التفعيل ('+ra.status+')</div>';return}
+  const d=ra.json.data,pr=Number(d.user_price||0);
+  if(rp.ok&&rp.json&&Array.isArray(rp.json.data))profilesCache=rp.json.data;
+  let extId=24,extName="Test",pts=Number(d.reward_points_balance||0);
+  if(re.ok&&re.json&&re.json.data&&re.json.data.reward_points_balance!==undefined)pts=Number(re.json.data.reward_points_balance);
+  if(rl.ok&&rl.json&&Array.isArray(rl.json.data)&&rl.json.data.length){extId=Number(rl.json.data[0].id||24);extName=rl.json.data[0].name||"Test"}
+  const opts=profilesCache.map(p=>`<option value="${p.id}" ${Number(p.id)===Number(d.profile_id)?'selected':''}>${p.name}</option>`).join("");
+  box.innerHTML=`<div class="box">المشترك: <b dir="ltr">${d.username||''}</b><br>الباقة: <b>${d.profile_name||'—'}</b> (${d.profile_duration||'30 day(s)'})<br>الانتهاء: <span dir="ltr">${d.user_expiration||'—'}</span><br>السعر: <b style="color:#38BDF8">${d.unit_price||pr}</b> • رصيدك: <b style="color:#4ADE80">${d.manager_balance||'—'}</b><br>النقاط: <b>${pts}</b></div>
+  <label>عدد الوحدات</label><select id="actUnits"><option value="1" selected>1 وحدة (${pr})</option><option value="2">2 وحدة (${pr*2})</option><option value="3">3 وحدات (${pr*3})</option></select>
+  <button id="bAct" type="button" class="btn btn-green" onclick="doAct(${uid},${pr})">تأكيد التفعيل بالرصيد</button>
+  <div class="sep"><label>تغيير الباقة فوراً</label><div style="display:flex;gap:6px"><select id="pSel" style="margin:0">${opts}</select><button id="bProf" type="button" class="btn btn-sm btn-ghost" onclick="doProf(${uid})">تغيير</button></div></div>
+  <div class="sep"><button id="bExt" type="button" class="btn btn-amber" onclick="doExt(${uid},${extId})">تمديد بالنقاط (${extName})</button></div>
+  <div id="rMsg" class="status" style="display:none"></div>`;
+}
 
-  const [rAct, rExt, rAllowed, rProfs] = await Promise.all([
-    sasReq("GET", "user/activationData/" + uid),
-    sasReq("GET", "user/extensionData/" + uid),
-    sasReq("GET", "allowedExtensions/3"),
-    profilesCache.length ? Promise.resolve({ ok: true, json: { data: profilesCache } }) : sasReq("GET", "list/profile/0")
-  ]);
+function rMsg(t,ok){const e=document.getElementById("rMsg");if(e){e.style.display="block";e.style.color=ok?"#4ADE80":"#FCA5A5";e.textContent=t}}
 
-  if (!rAct.ok || !rAct.json || !rAct.json.data) {
-    box.innerHTML = '<div style="color:#FCA5A5">فشل جلب بيانات التفعيل (' + rAct.status + ')</div>';
-    return;
-  }
-
-  const d = rAct.json.data;
-  const userPrice = Numb
+async function doAct(uid,pr){
+  const u=Number(document.getElementById("actUnits").value||1);if(!confirm("تأكيد تفعيل الاشتراك ("+u+" وحدة)؟"))return;
+  const b=document.getElementById("bAct");b.disabled=true;rMsg("جاري التفعيل...",true);
+  const r=await sasReq("POST","user/activate",{method:"credit",pin:"",user_id:String(uid),money_collected:1,comments:null,user_price:pr,issue_invoice:0,transaction_id:uuid(),activation_units:u});
+  b.disabled=false;if(r.ok&&r.json&&Number(r.json.status)===200){rMsg("تم تفعيل اشتراك المشترك بنجاح",true);refreshAll()}else rMsg(trMsg(r.json&&
