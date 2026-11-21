@@ -18,6 +18,16 @@ document.addEventListener("click", (e) => {
   }
 }, true);
 
+/* التحقق من فتح التطبيق من أيقونة الشاشة الرئيسية (Standalone) */
+function isStandaloneApp() {
+  try {
+    return window.navigator.standalone === true ||
+           (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  } catch (e) {
+    return false;
+  }
+}
+
 /* توليد بصمة فريدة لكل آيفون (تمنع تشابه أجهزة الآيفون من نفس الموديل) */
 async function computeUniqueDeviceCode() {
   let gpu = "";
@@ -330,6 +340,11 @@ const Sas4License = (() => {
   }
 
   async function activate(raw) {
+    if (!isStandaloneApp()) {
+      haptic([35, 45, 35]);
+      return { ok: false, msg: "لا يمكن التفعيل من المتصفح؛ ثبّت التطبيق على الشاشة الرئيسية وافتحه من الأيقونة أولاً" };
+    }
+
     const dev = await deviceCode();
     const chk = await verify(raw, dev);
     if (!chk.payload) {
@@ -401,15 +416,31 @@ async function openLicenseModal(allowClose = true) {
   licAllowClose = allowClose;
   const st = await Sas4License.status();
   currentLicStatus = st;
+  const standalone = isStandaloneApp();
   document.getElementById("licSummary").textContent = st.summary;
-  document.getElementById("licDevCode").textContent = st.device;
-  document.getElementById("licKeyInput").value = "";
-  document.getElementById("licFeedback").style.display = "none";
+  document.getElementById("licDevCode").textContent = standalone ? st.device : "ثبّت التطبيق أولاً";
+  const inp = document.getElementById("licKeyInput");
+  inp.value = "";
+  inp.disabled = !standalone;
+  const fb = document.getElementById("licFeedback");
+  if (!standalone) {
+    fb.style.display = "block";
+    fb.style.color = "#FBBF24";
+    fb.textContent = "⚠️ للتفعيل على الآيفون: اضغط زر المشاركة (⬆️) في أسفل Safari ← اختر (إضافة إلى الشاشة الرئيسية)، ثم افتح التطبيق من الأيقونة الجديدة.";
+  } else {
+    fb.style.display = "none";
+  }
   document.getElementById("licCloseBtn").style.display = allowClose ? "block" : "none";
   document.getElementById("licenseModal").style.display = "flex";
 }
 
 function copyDevCode() {
+  if (!isStandaloneApp()) {
+    const fb = document.getElementById("licFeedback");
+    fb.style.display = "block"; fb.style.color = "#FBBF24";
+    fb.textContent = "⚠️ ثبّت التطبيق على الشاشة الرئيسية وافتحه من الأيقونة أولاً ليظهر رمز جهازك الصحيح.";
+    return;
+  }
   if (!currentLicStatus) return;
   const code = currentLicStatus.device;
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -427,6 +458,12 @@ function copyDevCode() {
 }
 
 function requestKeyWhatsApp() {
+  if (!isStandaloneApp()) {
+    const fb = document.getElementById("licFeedback");
+    fb.style.display = "block"; fb.style.color = "#FBBF24";
+    fb.textContent = "⚠️ ثبّت التطبيق على الشاشة الرئيسية وافتحه من الأيقونة أولاً قبل طلب المفتاح.";
+    return;
+  }
   if (!currentLicStatus) return;
   const txt = `أرغب بتفعيل تطبيق HARON NET SAS4 (iPhone).\nرمز جهازي: ${currentLicStatus.device}`;
   window.open(`https://wa.me/${Sas4License.vendorWhatsApp}?text=${encodeURIComponent(txt)}`, "_blank");
@@ -487,4 +524,4 @@ function initLicenseGate() {
 
 window.addEventListener("DOMContentLoaded", initLicenseGate);
 if (document.readyState !== "loading") initLicenseGate();
-                
+    
