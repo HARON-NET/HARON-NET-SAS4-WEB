@@ -59,7 +59,7 @@ function isFtthUrl(raw) {
 }
 function normalizeFtthBase(raw) {
   let s = String(raw || "").trim();
-  if (!s || s.toLowerCase() === "ftth") return FTTH_ORIGIN + "/api";
+  if (!s || s.toLowerCase() === "ftth" || !isFtthUrl(s)) return FTTH_ORIGIN + "/api";
   if (!/^https?:\/\//i.test(s)) s = "https://" + s;
   try { return "https://" + new URL(s).host + "/api"; }
   catch (_) { return FTTH_ORIGIN + "/api"; }
@@ -272,54 +272,107 @@ function ftthExtractErr(res, fallback = "فشلت العملية") {
   return (res.text && res.text.trim().slice(0, 180)) || `${fallback} (HTTP ${res.status || 0})`;
 }
 
+let _ftthAuthPromise = null;
+window._ftthLastError = "";
+
 async function ftthProxyFetch(method, targetUrl, headersExtra = {}, body = null) {
-  const proxy = gs("sas4_proxy", "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev").trim().replace(/\/+$/, "");
+  let proxy = (gs("sas4_proxy", "") || "").trim().replace(/\/+$/, "");
+  if (!/^https?:\/\//i.test(proxy)) proxy = "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev";
   const h = Object.assign({
     "Accept": "application/json, text/plain, */*",
     "X-Target-Url": targetUrl,
     "X-Client-App": FTTH_CLIENT_APP,
     "X-User-Role": FTTH_USER_ROLE
   }, headersExtra);
-  const res = await fetch(proxy + "/proxy", { method, headers: h, body });
-  const text = await res.text();
-  let json = null;
-  try { json = JSON.parse(text); } catch (_) {}
-  return { ok: res.ok, status: res.status, text, json };
+  const opts = { method, headers: h };
+  if (method !== "GET" && method !== "HEAD" && body !== null && body !== undefined) {
+    opts.body = body;
+  }
+  try {
+    const res = await fetch(proxy + "/proxy", opts);
+    const text = await res.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch (_) {}
+    return { ok: res.ok, status: res.status, text, json };
+  } catch (e) {
+    return { ok: false, status: 0, text: e.message || "خطأ في الاتصال بالإنترنت أو البروكسي", json: null };
+  }
 }
 
 async function ftthRefreshAccessToken() {
   const rt = localStorage.getItem("ftth_refresh_token") || "";
   if (!rt) return false;
   const base = normalizeFtthBase(gs("sas4_login_url", FTTH_ORIGIN));
-  const form = new URLSearchParams({
-    grant_type: "refresh_token", scope: "openid profile", refresh_token: rt, client_id: ""
-  }).toString();
-  const r = await ftthProxyFetch("POST", base + "/auth/Contractor/token", {
-    "Content-Type": "application/x-www-form-urlencoded"
-  }, form);
-  if (r.ok && r.json && r.json.access_token) {
-    const at = r.json.access_token.trim();
-    const nrt = (r.json.refresh_token || rt).trim();
-    ss("sas4_token", at);
-    localStorage.setItem("ftth_refresh_token", nrt);
-    const accId = extractFtthAccountId(at);
-    if (accId) localStorage.setItem("ftth_account_id", accId);
-    return true;
+  const attempts = [
+    [base + "/auth/Contractor/token", ""],
+    [base + "/auth/Contractor/token", "earthlink-portals"],
+    ["https://sso.ftth.iq/auth/realms/Partners/protocol/openid-connect/token", "earthlink-portals"]
+  ];
+  for (const [ep, cid] of attempts) {
+    const form = new URLSearchParams({
+      grant_type: "refresh_token", scope: "openid profile", refresh_token: rt, client_id: cid
+    }).toString();
+    const r = await ftthProxyFetch("POST", ep, { "Content-Type": "application/x-www-form-urlencoded" }, form);
+    if (r.ok && r.json && r.json.access_token) {
+      const at = r.json.access_token.trim();
+      const nrt = (r.json.refresh_token || rt).trim();
+      ss("sas4_token", at);
+      localStorage.setItem("ftth_refresh_token", nrt);
+      const accId = extractFtthAccountId(at);
+      if (accId) localStorage.setItem("ftth_account_id", accId);
+      window._ftthLastError = "";
+      return true;
+    }
   }
   return false;
 }
 
-async function ftthEnsureToken() {
-  let tok = gs("sas4_token", "");
-  if (!tok || isFtthJwtExpiring(tok, 120)) {
-    if (await ftthRefreshAccessToken()) tok = gs("sas4_token", "");
+async function ftthReloginWithSavedCreds() {
+  const u = (gs("sas4_user", "") || "").trim();
+  const p = gs("sas4_pass", "") || "";
+  if (!u || !p) return false;
+  const base = normalizeFtthBase(gs("sas4_login_url", FTTH_ORIGIN));
+  const attempts = [
+    [base + "/auth/Contractor/token", ""],
+    [base + "/auth/Contractor/token", "earthlink-portals"],
+    ["https://sso.ftth.iq/auth/realms/Partners/protocol/openid-connect/token", "earthlink-portals"]
+  ];
+  for (const [ep, cid] of attempts) {
+    const form = new URLSearchParams({
+      grant_type: "password", scope: "openid profile", username: u, password: p, client_id: cid
+    }).toString();
+    const r = await ftthProxyFetch("POST", ep, { "Content-Type": "application/x-www-form-urlencoded" }, form);
+    if (r.ok && r.json && r.json.access_token && !r.json.second_factor_required) {
+      const at = r.json.access_token.trim();
+      const rt = (r.json.refresh_token || "").trim();
+      ss("sas4_token", at);
+      if (rt) localStorage.setItem("ftth_refresh_token", rt);
+      const accId = extractFtthAccountId(at);
+      if (accId) localStorage.setItem("ftth_account_id", accId);
+      window._ftthLastError = "";
+      return true;
+    }
   }
-  return tok;
+  return false;
+}
+
+async function ftthEnsureToken(forceRefresh = false) {
+  let tok = gs("sas4_token", "");
+  if (!forceRefresh && tok && !isFtthJwtExpiring(tok, 90)) return tok;
+  if (!_ftthAuthPromise) {
+    _ftthAuthPromise = (async () => {
+      if (await ftthRefreshAccessToken()) return gs("sas4_token", "");
+      if (await ftthReloginWithSavedCreds()) return gs("sas4_token", "");
+      window._ftthLastError = "انتهت جلسة FTTH وتعذر تجديدها تلقائياً — أعد تسجيل الدخول";
+      return "";
+    })().finally(() => { _ftthAuthPromise = null; });
+  }
+  return await _ftthAuthPromise;
 }
 
 async function ftthApiReq(method, path, bodyObj = null, isFormData = false, retryAuth = true) {
-  const tok = await ftthEnsureToken();
-  if (!tok) return { ok: false, status: 401, json: null, text: "انتهت جلسة FTTH — أعد تسجيل الدخول" };
+  const tok = await ftthEnsureToken(false);
+  if (!tok) return { ok: false, status: 401, json: null, text: window._ftthLastError || "انتهت جلسة FTTH" };
   const base = normalizeFtthBase(gs("sas4_login_url", FTTH_ORIGIN));
   const fullUrl = /^https?:\/\//i.test(path) ? path : (base + "/" + path.replace(/^\/+/, ""));
   const headers = { "Authorization": "Bearer " + tok };
@@ -332,7 +385,11 @@ async function ftthApiReq(method, path, bodyObj = null, isFormData = false, retr
   }
   const r = await ftthProxyFetch(method, fullUrl, headers, body);
   if (r.status === 401 && retryAuth) {
-    if (await ftthRefreshAccessToken()) return ftthApiReq(method, path, bodyObj, isFormData, false);
+    const newTok = await ftthEnsureToken(true);
+    if (newTok) return ftthApiReq(method, path, bodyObj, isFormData, false);
+  }
+  if (!r.ok && !window._ftthLastError) {
+    window._ftthLastError = `HTTP ${r.status}: ${ftthExtractErr(r, "تعذر الجلب من بوابة FTTH")}`;
   }
   if (r.ok && Array.isArray(r.json)) r.json = { items: r.json };
   return r;
@@ -460,7 +517,16 @@ function renderFtthChrome() {
       </div>`
     : "";
 
-  box.innerHTML = `
+  const errHtml = window._ftthLastError
+    ? `<div style="background:#450A0A;border:1px solid #EF444466;border-radius:12px;padding:10px;margin-bottom:8px;font-size:12px;color:#FCA5A5">
+        <div style="font-weight:800;margin-bottom:6px">⚠ ${escHtml(window._ftthLastError)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button type="button" class="btn btn-sm btn-amber" onclick="window._ftthLastError='';refreshAll()">إعادة المحاولة</button>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="logout();location.reload()">تسجيل الدخول مجدداً</button>
+        </div>
+      </div>`
+    : "";
+  box.innerHTML = errHtml + `
     <div class="ftth-hero-strip">
       <div>
         <div style="font-size:13px;font-weight:800;color:#F8FAFC">${escHtml(ex.partnerName || "بوابة وكيل FTTH")}</div>
@@ -500,6 +566,8 @@ function setFtthZoneFilter(zName) {
 
 async function ftthLoadMetrics() {
   updatePortalBrandBadge();
+  window._ftthLastError = "";
+  await ftthEnsureToken(false);
   const accId = localStorage.getItem("ftth_account_id") || extractFtthAccountId(gs("sas4_token", ""));
   const [fromGmt, toGmt] = ftthMonthRangeGmt();
   const [rDash, rWal, rPart, rRev, rTasks, rReqs, rNotif, rZones, rCust] = await Promise.all([
@@ -557,6 +625,7 @@ async function ftthLoadMetrics() {
     zones
   };
 
+  if (rDash.ok || rCust.ok || rWal.ok) window._ftthLastError = "";
   document.getElementById("mBalance").textContent = fmtIqdNum(bal, cur);
   document.getElementById("mPoints").textContent = comm.toLocaleString("en-US") + " عمولة";
   document.getElementById("mTotal").textContent = total;
@@ -630,6 +699,7 @@ async function ftthFetchOnlineMap() {
 
 async function ftthLoadSubs(silent = false) {
   const el = document.getElementById("subsList");
+  await ftthEnsureToken(false);
   if (!silent) el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">جاري جلب مشتركي FTTH...</div>';
   const [actItems, expItems, om, allCust] = await Promise.all([
     ftthFetchPaginated((ps, pg) => `subscriptions?pageSize=${ps}&pageNumber=${pg}&sortCriteria.property=expires&sortCriteria.direction=asc&status=Active&hierarchyLevel=1`, 20),
@@ -701,6 +771,7 @@ async function ftthLoadSubs(silent = false) {
     });
   });
 
+  if (out.length > 0) window._ftthLastError = "";
   allSubs = out;
   renderFtthChrome();
   renderList();
