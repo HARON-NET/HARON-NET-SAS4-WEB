@@ -108,6 +108,25 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
 .dev4-tab{background:#121822;border:1px solid #1E293B;color:#94A3B8;border-radius:8px;padding:6px 4px;font-size:11.5px;font-weight:700;cursor:pointer}
 .dev4-tab.on{background:#38BDF8;border-color:#38BDF8;color:#04131C}
   
+
+.ftth-hero-strip{display:flex;justify-content:space-between;align-items:center;gap:8px;background:linear-gradient(135deg,#0B1324,#0F1C2E);border:1px solid #1E3A5F;border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.ftth-tiles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:8px}
+.ftth-tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#0F172A;border:1px solid #1E293B;border-radius:12px;padding:10px 6px;color:#E2E8F0;font-size:12px;font-weight:700;cursor:pointer}
+.ftth-tile-ic{font-size:18px;line-height:1}
+.ftth-badge{position:absolute;top:5px;left:6px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;color:#FFF;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ftth-zones-row{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.ftth-zchip{white-space:nowrap;background:#0F172A;border:1px solid #1E293B;color:#94A3B8;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.ftth-zchip.on{background:#0EA5E9;border-color:#0EA5E9;color:#04131C}
+.ftth-sec-hd{font-size:13px;font-weight:800;color:#38BDF8;margin-bottom:8px}
+.ftth-kv{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1E293B66;font-size:12.5px}
+.ftth-kv:last-child{border-bottom:none}
+.ftth-kv span{color:#94A3B8}
+.ftth-kv b{color:#F8FAFC;text-align:left}
+.ftth-mini-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1E293B66;font-size:12px}
+.ftth-mini-item:last-child{border-bottom:none}
+.ftth-plan-card{display:flex;justify-content:space-between;align-items:center;background:#0B1220;border:1px solid #1E293B;border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13px}
+.ftth-plan-card.on{border-color:#38BDF8;background:#0C223A}
+
 </style>
 </head>
 <body>
@@ -180,7 +199,8 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
     </div>
 
     <!-- Debts Banner -->
-    <div id="debtCard" class="debt-banner" onclick="setFilter('debts')">
+    <div id="ftthDashChrome" style="display:none;margin-bottom:8px"></div>
+<div id="debtCard" class="debt-banner" onclick="setFilter('debts')">
       <div>
         <div style="font-size:13px;font-weight:700">💳 الديون (غير واصل)</div>
         <div style="font-size:11px;color:#94A3B8;margin-top:2px">اضغط لعرض المشتركين أصحاب الديون</div>
@@ -259,6 +279,21 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
   </div>
 </div>
 
+
+<!-- FTTH Full Modal -->
+<div id="ftthModal" class="modal-bg" style="z-index:65" onclick="if(event.target===this)closeFtthSheet()">
+  <div class="card" style="width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;padding:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;border-bottom:1px solid #1E293B;padding-bottom:8px">
+      <div>
+        <b id="ftthModalTitle" style="font-size:16px;color:#F8FAFC;display:block">FTTH</b>
+        <small id="ftthModalSub" style="color:#94A3B8;font-size:11.5px;display:none"></small>
+      </div>
+      <button type="button" class="btn btn-sm btn-ghost" style="width:auto;padding:6px 12px" onclick="closeFtthSheet()">إغلاق</button>
+    </div>
+    <div id="ftthModalBody" style="overflow-y:auto;flex:1;padding-bottom:8px"></div>
+  </div>
+</div>
+
 <!-- License Modal -->
 <div id="licenseModal" class="modal-bg" style="z-index:70" onclick="if(event.target===this&&licAllowClose)this.style.display='none'">
   <div class="card" style="width:100%;max-width:430px;max-height:92vh;overflow-y:auto">
@@ -325,7 +360,7 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
   window.addEventListener("DOMContentLoaded", () => { domFired = true; }, { once: true });
 
   const v = Date.now();
-  const files = ["app.js?v=20261128d", "license.js?v=20261128d", "details.js"];
+  const files = ["app.js?v=20261128e", "license.js?v=20261128e", "details.js?v=20261128e"];
   let idx = 0;
 
   function loadNext() {
@@ -366,7 +401,7 @@ function toggleFullScreen() {
 }
   </script>
   
-<script src="ftth.js?v=20261128d"></script>
+<script src="ftth.js?v=20261128e"></script>
 </body>
 </html>
 

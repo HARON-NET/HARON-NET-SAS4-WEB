@@ -354,6 +354,7 @@ function renderList() {
     if (currentFilter === "expired" && s.isActive) return false;
     if (currentFilter === "expiring" && (!s.isActive || s.days > 3)) return false;
     if (currentFilter === "debts" && s.loan <= 0) return false;
+    if (typeof isFtthMode === "function" && isFtthMode() && window.ftthSelectedZone && s.nas !== window.ftthSelectedZone) return false;
     return !q || s.username.toLowerCase().includes(q) || s.fullName.toLowerCase().includes(q) || s.profile.toLowerCase().includes(q) || s.ip.toLowerCase().includes(q);
   });
 
@@ -496,6 +497,7 @@ async function doProf(uid) {
 }
 
 async function openHistory() {
+  if (typeof isFtthMode === "function" && isFtthMode()) return ftthOpenHistory();
   document.getElementById("modalTitle").textContent = "سجل التفعيلات";
   const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
   document.getElementById("detailModal").style.display = "flex";
@@ -506,7 +508,7 @@ async function openHistory() {
 }
 
 async function disconnectSub(rad) { if (!confirm("فصل اتصال المشترك؟")) return; await sasReq("GET", "user/disconnect/acctid/" + rad); document.getElementById("detailModal").style.display = "none"; loadSubs(true); }
-function logout() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } localStorage.removeItem("sas4_token"); document.getElementById("appView").style.display = "none"; document.getElementById("loginView").style.display = "flex"; }
+function logout() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } localStorage.removeItem("sas4_token"); localStorage.removeItem("ftth_refresh_token"); window.ftthSelectedZone = ""; document.getElementById("appView").style.display = "none"; document.getElementById("loginView").style.display = "flex"; }
 
 window.addEventListener("DOMContentLoaded", () => {
   if (typeof renderSavedPagesUI === "function") renderSavedPagesUI();
