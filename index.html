@@ -137,7 +137,16 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
           <input id="loginUrl" type="url" dir="ltr" value="https://reseller.nbtel.iq/api.php?action=login">
         </div>
       </details>
-      <button id="loginBtn" type="button" class="btn" onclick="doLogin()">تسجيل الدخول</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+<button type="button" class="btn btn-sm btn-ghost" style="border-color:#38BDF8;color:#38BDF8" onclick="selectPortalPreset('sas4')">بوابات SAS4 (الكل)</button>
+<button type="button" class="btn btn-sm btn-ghost" style="border-color:#34D399;color:#34D399" onclick="selectPortalPreset('ftth')">بوابة FTTH</button>
+</div>
+<div id="ftthTokenWrap" style="display:none;margin-bottom:8px">
+<label>توكن FTTH (اختياري — فقط عند تفعيل 2FA)</label>
+<input id="ftthManualToken" type="text" dir="ltr" placeholder="Bearer eyJhbGci...">
+</div>
+<div id="savedPagesLoginBox" style="margin-bottom:10px"></div>
+<button id="loginBtn" type="button" class="btn" onclick="doLogin()">تسجيل الدخول</button>
       <div id="statusBox" class="status">الحالة: جاهز لتسجيل الدخول</div>
     </div>
   </div>
@@ -244,7 +253,8 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
       <input id="setUser" type="text" dir="ltr">
       <label>كلمة المرور</label>
       <input id="setPass" type="password" dir="ltr">
-      <div id="setMsg" class="status" style="display:none;color:#FBBF24;margin-bottom:9px"></div>
+      <div id="savedPagesSettingsBox" style="margin-bottom:10px"></div>
+<div id="setMsg" class="status" style="display:none;color:#FBBF24;margin-bottom:9px"></div>
       <button type="button" class="btn" onclick="saveSettingsAndConnect()">حفظ بيانات الدخول وتسجيل الاتصال</button>
       <button type="button" class="btn btn-ghost" style="color:#FCA5A5;margin-top:8px" onclick="logout();document.getElementById('settingsModal').style.display='none'">تسجيل الخروج</button>
     </div>

@@ -94,32 +94,84 @@ async function apiCall(method, target, obj = null, auth = true) {
 async function doLogin(silent = false) {
   const user = (document.getElementById("username").value || gs("sas4_user")).trim();
   const pass = document.getElementById("password").value || gs("sas4_pass");
-  const proxy = document.getElementById("proxyUrl").value.trim().replace(/\/+$/, "");
-  const lurl = document.getElementById("loginUrl").value.trim();
-  if (!user || !pass) { if (!silent) setStatus("أدخل اسم المستخدم وكلمة المرور.", "#FBBF24"); return false; }
+  const proxy = (document.getElementById("proxyUrl")?.value || gs("sas4_proxy", "https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev")).trim().replace(/\/+$/, "");
+  const lurl = (document.getElementById("loginUrl")?.value || gs("sas4_login_url", "https://reseller.nbtel.iq/api.php?action=login")).trim();
+  const btn = document.getElementById("loginBtn");
+
   ss("sas4_user", user); ss("sas4_pass", pass); ss("sas4_proxy", proxy); ss("sas4_login_url", lurl);
-  const btn = document.getElementById("loginBtn"); btn.disabled = true;
-  if (!silent) setStatus("جاري الاتصال ببوابة SAS4...", "#38BDF8");
-  try {
-    const r = await apiCall("POST", lurl, { username: user, password: pass, language: "ar" }, false);
-    btn.disabled = false;
-    if (r.ok && r.json && Number(r.json.status) === 200 && r.json.token) {
-      ss("sas4_token", r.json.token);
-      const base = (r.json.successful_server && r.json.successful_server.api_url) ? r.json.successful_server.api_url.replace(/\/+$/, "") : "https://s3.nbtel.iq/admin/api/index.php/api";
-      ss("sas4_api_base", base);
-      if (!silent) {
-        document.getElementById("loginView").style.display = "none";
-        document.getElementById("appView").style.display = "block";
-        startLiveLoop();
-        refreshAll();
+
+  // وضع FTTH تلقائياً عند إدخال رابط ftth.iq
+  if (typeof isFtthUrl === "function" && isFtthUrl(lurl)) {
+    if (btn) btn.disabled = true;
+    if (!silent) setStatus("جاري الاتصال ببوابة FTTH...", "#34D399");
+    try {
+      const fr = await ftthLogin(lurl, user, pass, silent);
+      if (btn) btn.disabled = false;
+      if (fr.ok) {
+        if (!silent) {
+          document.getElementById("loginView").style.display = "none";
+          document.getElementById("appView").style.display = "block";
+          startLiveLoop();
+          refreshAll();
+        }
+        return true;
       }
-      return true;
+      if (!silent) setStatus(fr.msg || "فشل الدخول لبوابة FTTH", "#FCA5A5");
+      return false;
+    } catch (e) {
+      if (btn) btn.disabled = false;
+      if (!silent) setStatus("تعذر الاتصال بـ FTTH: " + e.message, "#FCA5A5");
+      return false;
     }
-    const err = (r.json && (r.json.message || r.json.error)) || r.text.slice(0, 120) || ("HTTP " + r.status);
-    if (!silent) setStatus("فشل الدخول (" + r.status + "): " + err, "#FCA5A5");
+  }
+
+  // وضع SAS4 الشامل (يجرّب جميع المسارات الممكنة لأي صفحة ساس)
+  if (!user || !pass) { if (!silent) setStatus("أدخل اسم المستخدم وكلمة المرور.", "#FBBF24"); return false; }
+  localStorage.setItem("sas4_portal_type", "sas4");
+  if (btn) btn.disabled = true;
+  if (!silent) setStatus("جاري اكتشاف بوابة SAS4 وتسجيل الدخول...", "#38BDF8");
+
+  const candidates = (typeof resolveSas4LoginCandidates === "function")
+    ? resolveSas4LoginCandidates(lurl)
+    : [[lurl, "https://s3.nbtel.iq/admin/api/index.php/api"]];
+
+  let lastErr = "فشل الاتصال ببوابة الدخول";
+  try {
+    for (const [epLogin, epBase] of candidates) {
+      const r = await apiCall("POST", epLogin, { username: user, password: pass, language: "ar" }, false);
+      const tok = r.json && (r.json.token || r.json.access_token);
+      if (tok && (Number(r.json.status) === 200 || r.ok)) {
+        if (btn) btn.disabled = false;
+        ss("sas4_token", tok);
+        const base = (r.json.successful_server && r.json.successful_server.api_url)
+          ? r.json.successful_server.api_url.replace(/\/+$/, "")
+          : epBase;
+        ss("sas4_api_base", base);
+        ss("sas4_login_url", epLogin);
+        if (typeof upsertSavedPage === "function") upsertSavedPage(epLogin, base, user, pass, "sas4");
+        if (typeof updatePortalBrandBadge === "function") updatePortalBrandBadge();
+        if (!silent) {
+          document.getElementById("loginView").style.display = "none";
+          document.getElementById("appView").style.display = "block";
+          startLiveLoop();
+          refreshAll();
+        }
+        return true;
+      }
+      if (r.status === 404 || r.status === 405 || (r.json && (Number(r.json.status) === 404 || Number(r.json.status) === 405))) {
+        lastErr = "المسار غير موجود (" + r.status + ")";
+        continue;
+      }
+      const msg = (r.json && (r.json.message || r.json.error)) || "";
+      if (msg) { lastErr = msg; break; }
+      if (r.status === 401 || r.status === 403) { lastErr = "اسم المستخدم أو كلمة المرور غير صحيحة"; break; }
+      lastErr = r.text.slice(0, 120) || ("HTTP " + r.status);
+    }
+    if (btn) btn.disabled = false;
+    if (!silent) setStatus("فشل الدخول: " + lastErr, "#FCA5A5");
     return false;
   } catch (e) {
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
     if (!silent) setStatus("تعذر الاتصال: " + e.message, "#FCA5A5");
     return false;
   }
@@ -135,6 +187,7 @@ async function sasReq(m, p, o = null) {
 function refreshAll() { loadMetrics(); loadSubs(); }
 
 async function loadMetrics() {
+  if (typeof isFtthMode === "function" && isFtthMode()) return ftthLoadMetrics();
   const ks = ["wd_balance","wd_reward_points","wd_users_count","wd_users_online","wd_users_active_count","wd_users_expired_count","wd_users_expiring_in_3_days"];
   const rs = await Promise.all(ks.map(k => sasReq("GET", "widgetData/internal/" + k)));
   const get = i => (rs[i] && rs[i].ok && rs[i].json && rs[i].json.data !== undefined) ? rs[i].json.data : null;
@@ -167,6 +220,7 @@ function computeRates(uid, inB, outB, now) {
 }
 
 async function fetchOnlineMap() {
+  if (typeof isFtthMode === "function" && isFtthMode()) return ftthFetchOnlineMap();
   const ro = await sasReq("POST", "index/online", { page: 1, count: 500, sortBy: null, direction: "asc", search: "", columns: ["id","username","framedipaddress","callingstationid","acctsessiontime","acctinputoctets","acctoutputoctets"] });
   const om = {}, now = Date.now() / 1000;
   if (ro.ok && ro.json && Array.isArray(ro.json.data)) {
@@ -182,6 +236,7 @@ async function fetchOnlineMap() {
 }
 
 async function loadSubs(silent = false) {
+  if (typeof isFtthMode === "function" && isFtthMode()) return ftthLoadSubs(silent);
   const el = document.getElementById("subsList");
   if (!silent) el.innerHTML = '<div class="card" style="text-align:center;color:#94A3B8">جاري جلب المشتركين...</div>';
   const [ru, om] = await Promise.all([
@@ -358,6 +413,7 @@ function renderList() {
 }
 
 async function openDetails(uid) {
+  if (typeof isFtthMode === "function" && isFtthMode()) return ftthOpenDetails(uid);
   const s = allSubs.find(x => x.id === uid);
   document.getElementById("modalTitle").textContent = s ? s.fullName : uid;
   const b = document.getElementById("modalBody"); b.textContent = "جاري التحميل...";
@@ -453,6 +509,8 @@ async function disconnectSub(rad) { if (!confirm("فصل اتصال المشتر
 function logout() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } localStorage.removeItem("sas4_token"); document.getElementById("appView").style.display = "none"; document.getElementById("loginView").style.display = "flex"; }
 
 window.addEventListener("DOMContentLoaded", () => {
+  if (typeof renderSavedPagesUI === "function") renderSavedPagesUI();
+  if (typeof updatePortalBrandBadge === "function") updatePortalBrandBadge();
   document.getElementById("username").value = gs("sas4_user");
   document.getElementById("password").value = gs("sas4_pass");
   if (gs("sas4_proxy")) document.getElementById("proxyUrl").value = gs("sas4_proxy");
