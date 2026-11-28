@@ -129,10 +129,9 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
       <label>كلمة المرور</label>
       <input id="password" type="password" dir="ltr" placeholder="••••••••">
       <details style="margin-bottom:11px;font-size:12px;color:#94A3B8">
-        <summary style="cursor:pointer">إعدادات السيرفر والوسيط</summary>
+        <summary style="cursor:pointer">إعدادات بوابة السيرفر</summary>
         <div style="margin-top:8px">
-          <label>رابط الوسيط (Cloudflare Worker)</label>
-          <input id="proxyUrl" type="url" dir="ltr" value="https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev">
+          <input id="proxyUrl" type="hidden" value="https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev">
           <label>رابط بوابة SAS4</label>
           <input id="loginUrl" type="url" dir="ltr" value="https://reseller.nbtel.iq/api.php?action=login">
         </div>
@@ -247,8 +246,7 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
       <b style="font-size:14px;display:block;margin-bottom:8px">ضبط الاتصال وبيانات الدخول المحفوظة</b>
       <label>رابط بوابة المصادقة</label>
       <input id="setLoginUrl" type="url" dir="ltr">
-      <label>رابط الوسيط (Cloudflare Worker)</label>
-      <input id="setProxyUrl" type="url" dir="ltr">
+      <input id="setProxyUrl" type="hidden" value="https://flat-flower-e68bsas4-proxy.haronmardin.workers.dev">
       <label>اسم المستخدم</label>
       <input id="setUser" type="text" dir="ltr">
       <label>كلمة المرور</label>
@@ -286,7 +284,7 @@ input,select,textarea{width:100%;background:#080C12;border:1px solid #1E293B;bor
   window.addEventListener("DOMContentLoaded", () => { domFired = true; }, { once: true });
 
   const v = Date.now();
-  const files = ["app.js?v=20261128b", "license.js", "details.js"];
+  const files = ["app.js?v=20261128c", "license.js", "details.js"];
   let idx = 0;
 
   function loadNext() {
@@ -327,7 +325,7 @@ function toggleFullScreen() {
 }
   </script>
   
-<script src="ftth.js?v=20261128b"></script>
+<script src="ftth.js?v=20261128c"></script>
 </body>
 </html>
 
